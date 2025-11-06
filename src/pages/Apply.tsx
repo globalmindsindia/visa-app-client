@@ -372,9 +372,9 @@ const Apply = () => {
                         <SelectValue placeholder="Select intake" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="jan">January</SelectItem>
-                        <SelectItem value="may">May</SelectItem>
-                        <SelectItem value="sep">September</SelectItem>
+                        <SelectItem value="summer">summer</SelectItem>
+                        <SelectItem value="Winter/Fall">Winter/Fall</SelectItem>
+                        
                       </SelectContent>
                     </Select>
                   </div>

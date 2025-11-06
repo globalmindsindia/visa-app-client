@@ -1,6 +1,9 @@
-import { Globe, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Youtube, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import gmiLogo from "@/assets/gmi_logo.png";
+import indiaFlag from "@/assets/india-flag.png";
+import germanyFlag from "@/assets/German-Flag.png";
 
 const Footer = () => {
   return (
@@ -16,8 +19,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Globe className="h-8 w-8" />
-              <span className="font-heading font-bold text-xl">VisaPortal</span>
+              <img src={gmiLogo} alt="Global Minds India" className="h-16 w-auto" />
             </div>
             <p className="font-body text-sm text-primary-foreground/80">
               Your trusted partner for seamless visa application and study abroad support.
@@ -48,19 +50,35 @@ const Footer = () => {
             <ul className="space-y-3 font-body text-sm">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                <a href="mailto:info@visaportal.com" className="hover:text-accent transition-colors">
-                  info@visaportal.com
+                <a href="mailto:connect@globalmindsindia.com" className="hover:text-accent transition-colors">
+                  connect@globalmindsindia.com
                 </a>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                <a href="tel:+911234567890" className="hover:text-accent transition-colors">
-                  +91 123 456 7890
+                <a href="tel:+917353446655" className="hover:text-accent transition-colors">
+                  +91 7353446655
                 </a>
               </li>
-              <li className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-1" />
-                <span>123 Education Street, Mumbai, India 400001</span>
+              <li className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                <span className="flex items-center gap-2">
+                  <img src={indiaFlag} alt="India" className="h-4 w-6 object-cover rounded" />
+                  23, CJ VenkataDas road, Padmanabhanagar, Bangalore
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                <span className="flex items-center gap-2">
+                  <img src={germanyFlag} alt="Germany" className="h-4 w-6 object-cover rounded" />
+                  Overseas Office - Germany: Koenigsheideweg Berlin, Germany
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                <a href="tel:+4917645728219" className="hover:text-accent transition-colors">
+                  +49 17645728219
+                </a>
               </li>
             </ul>
           </div>
@@ -69,19 +87,19 @@ const Footer = () => {
         <div className="border-t border-primary-foreground/20 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="font-body text-sm text-primary-foreground/80">
-              © 2025 Global Minds India. All rights reserved.
+              © 2024 <a href="https://globalmindsinidia.com" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors hover:underline">Global Minds India</a>. All rights reserved.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="hover:text-accent transition-colors">
+              <a href="https://www.facebook.com/people/Global-Minds-India/61573595922348/" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="hover:text-accent transition-colors">
-                <Twitter className="h-5 w-5" />
+              <a href="https://www.youtube.com/@GlobalMindsIndia-1" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
+                <Youtube className="h-5 w-5" />
               </a>
-              <a href="#" className="hover:text-accent transition-colors">
+              <a href="https://www.instagram.com/globalminds_india/" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="hover:text-accent transition-colors">
+              <a href="https://www.linkedin.com/company/global-minds-india/" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
                 <Linkedin className="h-5 w-5" />
               </a>
             </div>

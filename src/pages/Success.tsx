@@ -66,19 +66,13 @@ const Success = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.5 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center pt-4"
+              className="flex justify-center pt-4"
             >
               <Button 
                 onClick={() => navigate("/")}
                 className="bg-primary hover:bg-primary/90"
               >
                 Return to Home
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => navigate("/track")}
-              >
-                Track Application Status
               </Button>
             </motion.div>
           </div>

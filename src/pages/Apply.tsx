@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Upload, Check, Home, AlertTriangle, Mail, Phone, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, Check, Home, AlertTriangle, Mail, Phone, X, HelpCircle, Clock, MessageCircle, Tag, Percent } from "lucide-react";
 import { toast } from "sonner";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,6 +40,10 @@ const Apply = () => {
     courses: [] as string[],
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState("");
+  const [discount, setDiscount] = useState(0);
 
   const totalSteps = 4;
   const progress = (step / totalSteps) * 100;
@@ -128,6 +132,39 @@ const Apply = () => {
     }
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      const file = files[0];
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      
+      if (allowedTypes.includes(file.type)) {
+        setFormData({ ...formData, document: file });
+        toast.success(`File "${file.name}" uploaded successfully!`);
+      } else {
+        toast.error('Please upload only PDF, JPG, or PNG files');
+      }
+    }
+  };
+
   const validateStep = () => {
     if (step === 1) {
       if (!formData.name || !formData.email || !formData.phone || !formData.city) {
@@ -164,12 +201,18 @@ const Apply = () => {
       const result = await processPayment({
         name: formData.name,
         email: formData.email,
-        phone: formData.phone
+        phone: formData.phone,
+        amount: 10000 - discount
       }) as { success: boolean } | undefined;
       
       if (result?.success) {
         setTimeout(() => {
-          navigate("/success");
+          navigate("/success", { 
+            state: { 
+              name: formData.name, 
+              email: formData.email 
+            } 
+          });
         }, 1500);
       }
     } catch (error) {
@@ -393,24 +436,41 @@ const Apply = () => {
                   <div>
                     <Label htmlFor="document">Upload Admission / Acceptance Letter *</Label>
                     <div className="mt-2">
-                      <label htmlFor="file-upload" className="cursor-pointer">
-                        <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors">
-                          <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                          <p className="font-body text-sm text-muted-foreground mb-2">
-                            {formData.document ? formData.document.name : "Click to upload or drag and drop"}
-                          </p>
-                          <p className="font-body text-xs text-muted-foreground">
-                            PDF, JPG, PNG (max. 10MB)
-                          </p>
-                        </div>
-                        <input
-                          id="file-upload"
-                          type="file"
-                          className="hidden"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          onChange={handleFileChange}
-                        />
-                      </label>
+                      <div 
+                        className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors"
+                        onDragOver={handleDragOver}
+                        onDragEnter={handleDragEnter}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                      >
+                        <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <p className="font-body text-sm text-muted-foreground mb-2">
+                          {formData.document ? formData.document.name : "Drag and drop your file here"}
+                        </p>
+                        <p className="font-body text-xs text-muted-foreground mb-4">
+                          PDF, JPG, PNG (max. 10MB)
+                        </p>
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => document.getElementById('file-upload')?.click()}
+                            className="bg-primary text-white hover:bg-primary/90 border-primary"
+                          >
+                            {formData.document ? "Change File" : "Choose File"}
+                          </Button>
+                        </motion.div>
+                      </div>
+                      <input
+                        id="file-upload"
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={handleFileChange}
+                      />
                     </div>
                     {formData.document && (
                       <div className="mt-4 p-4 bg-primary/10 rounded-lg flex items-center gap-2">
@@ -446,12 +506,119 @@ const Apply = () => {
                         <span>Counselor Support</span>
                         <span>₹3,000</span>
                       </div>
-                      <div className="border-t pt-2 mt-2 flex justify-between font-semibold text-lg">
-                        <span>Total Amount</span>
-                        <span className="text-primary">₹10,000</span>
+                      <div className="border-t pt-2 mt-2">
+                        <div className="flex justify-between">
+                          <span>Subtotal</span>
+                          <span>₹10,000</span>
+                        </div>
+                        {appliedCoupon && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex justify-between text-green-600 mt-1"
+                          >
+                            <span className="flex items-center gap-1">
+                              <Percent className="h-4 w-4" />
+                              Discount ({appliedCoupon})
+                            </span>
+                            <span>-₹{discount}</span>
+                          </motion.div>
+                        )}
+                        <div className="flex justify-between font-semibold text-lg mt-2 pt-2 border-t">
+                          <span>Total Amount</span>
+                          <span className={appliedCoupon ? "text-green-600" : "text-primary"}>
+                            ₹{10000 - discount}
+                          </span>
+                        </div>
+                        {appliedCoupon && (
+                          <motion.div 
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="text-sm text-green-600 text-right mt-1"
+                          >
+                            You saved ₹{discount}!
+                          </motion.div>
+                        )}
                       </div>
                     </div>
                   </div>
+
+                  {/* Coupon Section */}
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-6"
+                  >
+                    <div className="flex items-center gap-2 mb-4">
+                      <Tag className="h-5 w-5 text-orange-600" />
+                      <h4 className="font-semibold text-gray-900">Have a coupon code?</h4>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <Input
+                          placeholder="Enter coupon code"
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                          className="pr-20"
+                        />
+                        {couponCode && (
+                          <motion.button
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            onClick={() => {
+                              setCouponCode("");
+                              setAppliedCoupon("");
+                              setDiscount(0);
+                            }}
+                            className="absolute right-3 inset-y-0 my-auto text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100"
+                          >
+                            <X className="h-4 w-4" />
+                          </motion.button>
+                        )}
+                      </div>
+                      
+
+                      
+                      <motion.div 
+                        className="bg-white rounded-lg p-4 border border-orange-200"
+                        whileHover={{ scale: 1.02 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-1 rounded text-sm font-bold">
+                                GMI10
+                              </div>
+                              <span className="text-sm font-medium text-gray-700">10% OFF</span>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Save ₹1,000 on your application</p>
+                          </div>
+                          <motion.button
+                            onClick={() => {
+                              setCouponCode("GMI10");
+                              setAppliedCoupon("GMI10");
+                              setDiscount(1000);
+                              toast.success("Coupon applied! You saved ₹1,000");
+                            }}
+                            disabled={appliedCoupon === "GMI10"}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                              appliedCoupon === "GMI10" 
+                                ? "bg-green-100 text-green-700 cursor-not-allowed" 
+                                : "bg-orange-500 text-white hover:bg-orange-600 hover:scale-105"
+                            }`}
+                            whileHover={appliedCoupon !== "GMI10" ? { scale: 1.05 } : {}}
+                            whileTap={appliedCoupon !== "GMI10" ? { scale: 0.95 } : {}}
+                          >
+                            {appliedCoupon === "GMI10" ? "Applied" : "Use This"}
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+
                   <p className="font-body text-sm text-muted-foreground text-center">
                     Secure payment gateway integration will be processed here
                   </p>
@@ -478,7 +645,7 @@ const Apply = () => {
                   disabled={isProcessing}
                   className="flex-1 bg-primary hover:bg-primary/90"
                 >
-                  {isProcessing ? "Processing..." : step === totalSteps ? "Submit & Pay" : "Next"}
+                  {isProcessing ? "Processing..." : step === totalSteps ? `Submit & Pay ₹${10000 - discount}` : "Next"}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -489,6 +656,173 @@ const Apply = () => {
       </main>
       </div>
       
+      {/* Help Button */}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 1, type: "spring", stiffness: 200 }}
+        className="fixed bottom-6 right-6 z-40"
+      >
+        <motion.button
+          onClick={() => setShowHelpModal(true)}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group flex items-center gap-2"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <motion.div
+            animate={{ rotate: [0, -10, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+          >
+            <HelpCircle className="h-5 w-5" />
+          </motion.div>
+          <span className="font-medium text-sm">Help</span>
+          <motion.div
+            initial={{ opacity: 0, x: 10 }}
+            whileHover={{ opacity: 1, x: 0 }}
+            className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap pointer-events-none"
+          >
+            Need Help?
+            <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
+          </motion.div>
+        </motion.button>
+      </motion.div>
+
+      {/* Help Modal */}
+      <AnimatePresence>
+        {showHelpModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowHelpModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="bg-white rounded-3xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <motion.div
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="bg-white/20 p-2 rounded-full"
+                      >
+                        <MessageCircle className="h-6 w-6" />
+                      </motion.div>
+                      <div>
+                        <h3 className="text-2xl font-bold">Customer Support</h3>
+                        <p className="text-blue-100 text-sm">We're here to help you succeed!</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowHelpModal(false)}
+                      className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="p-6 space-y-6">
+                  <div className="text-center">
+                    <p className="text-gray-700 text-lg font-medium mb-4">
+                      Need assistance? Our support team is ready to help!
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <motion.div 
+                      className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 border border-blue-100"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ type: "spring", stiffness: 400 }}
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="bg-blue-600 p-2 rounded-full">
+                          <Mail className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">Email Support</h4>
+                        </div>
+                      </div>
+                      <motion.a 
+                        href="mailto:connect@globalmindsindia.com"
+                        className="text-blue-600 font-medium hover:text-blue-800 transition-colors block"
+                        whileHover={{ x: 5 }}
+                      >
+                        connect@globalmindsindia.com
+                      </motion.a>
+                    </motion.div>
+
+                    <motion.div 
+                      className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-4 border border-green-100"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ type: "spring", stiffness: 400 }}
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="bg-green-600 p-2 rounded-full">
+                          <Phone className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">Phone Support</h4>
+                        </div>
+                      </div>
+                      <motion.a 
+                        href="tel:+917353446655"
+                        className="text-green-600 font-medium hover:text-green-800 transition-colors block"
+                        whileHover={{ x: 5 }}
+                      >
+                        +91 7353446655
+                      </motion.a>
+                    </motion.div>
+                  </div>
+
+                  <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="bg-amber-500 p-2 rounded-full">
+                        <Clock className="h-5 w-5 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900">Quick Tips</h4>
+                    </div>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                        <span><strong>Response time:</strong> Within 2-4 hours</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                        <span><strong>Available:</strong> Monday to Saturday, 9 AM - 7 PM</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <motion.div 
+                    className="text-center"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      onClick={() => setShowHelpModal(false)}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-2 rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      Got it, Thanks!
+                    </Button>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Confirmation Dialog */}
       <AnimatePresence>
         {showConfirmDialog && (

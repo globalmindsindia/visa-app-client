@@ -1,11 +1,19 @@
 import { Mail, Phone, MapPin, Facebook, Youtube, Instagram, Linkedin } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import gmiLogo from "@/assets/gmi_logo.png";
 import indiaFlag from "@/assets/india-flag.png";
 import germanyFlag from "@/assets/German-Flag.png";
 
 const Footer = () => {
+  const navigate = useNavigate();
+
+  const handleHomeClick = () => {
+    navigate("/");
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+  };
   return (
     <motion.footer 
       initial={{ opacity: 0 }}
@@ -29,7 +37,7 @@ const Footer = () => {
           <div>
             <h3 className="font-heading font-semibold text-lg mb-4">Quick Links</h3>
             <ul className="space-y-2 font-body text-sm">
-              <li><Link to="/" className="hover:text-accent transition-colors">Home</Link></li>
+              <li><button onClick={handleHomeClick} className="hover:text-accent transition-colors">Home</button></li>
               <li><a href="#services" className="hover:text-accent transition-colors">Services</a></li>
               <li><a href="#countries" className="hover:text-accent transition-colors">Countries</a></li>
               <li><a href="#why-us" className="hover:text-accent transition-colors">Why Choose Us</a></li>

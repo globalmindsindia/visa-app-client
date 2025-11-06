@@ -18,7 +18,12 @@ const Header = () => {
   ];
 
   const scrollToSection = (sectionId: string) => {
-    if (sectionId.startsWith("#")) {
+    if (sectionId === "/") {
+      navigate("/");
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    } else if (sectionId.startsWith("#")) {
       const element = document.querySelector(sectionId);
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });

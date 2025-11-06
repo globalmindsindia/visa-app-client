@@ -17,6 +17,7 @@ export const usePayment = () => {
     name: string;
     email: string;
     phone: string;
+    amount?: number;
   }) => {
     setIsProcessing(true);
     
@@ -38,7 +39,7 @@ export const usePayment = () => {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        amount: 10000, // Amount in rupees, backend should convert to paise
+        amount: formData.amount || 10000, // Amount in rupees, backend should convert to paise
         description: "Visa Application Processing Fee"
       });
       

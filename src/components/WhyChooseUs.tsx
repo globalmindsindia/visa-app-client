@@ -31,7 +31,7 @@ const comparisons = [
 
 const WhyChooseUs = () => {
   return (
-    <section id="why-us" className="py-20 bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))]">
+    <section id="why-us" className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
@@ -56,10 +56,10 @@ const WhyChooseUs = () => {
           className="max-w-5xl mx-auto"
         >
           <div className="bg-card rounded-2xl shadow-2xl overflow-hidden border">
-            <div className="grid md:grid-cols-3 bg-primary text-primary-foreground p-4">
-              <div className="font-heading font-semibold text-lg">Feature</div>
-              <div className="font-heading font-semibold text-lg">We Offer</div>
-              <div className="font-heading font-semibold text-lg">Others Provide</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 bg-primary text-primary-foreground p-3 sm:p-4">
+              <div className="font-heading font-semibold text-base sm:text-lg mb-2 md:mb-0">Feature</div>
+              <div className="font-heading font-semibold text-base sm:text-lg mb-2 md:mb-0">We Offer</div>
+              <div className="font-heading font-semibold text-base sm:text-lg">Others Provide</div>
             </div>
 
             {comparisons.map((item, index) => (
@@ -69,7 +69,7 @@ const WhyChooseUs = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="grid md:grid-cols-3 gap-4 p-6 border-b last:border-b-0 hover:bg-muted/50 transition-colors"
+                className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-6 border-b last:border-b-0 hover:bg-muted/50 transition-colors"
               >
                 <div className="font-body font-semibold text-foreground">
                   {item.feature}
@@ -92,7 +92,7 @@ const WhyChooseUs = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-wrap justify-center gap-8 mt-12"
+          className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-10 md:mt-12"
         >
           {[
             { value: "10K+", label: "Happy Students" },
@@ -107,9 +107,9 @@ const WhyChooseUs = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
               whileHover={{ scale: 1.05 }}
-              className="text-center bg-card p-6 rounded-xl shadow-lg min-w-[150px]"
+              className="text-center bg-card p-4 sm:p-6 rounded-xl shadow-lg min-w-[120px] sm:min-w-[150px]"
             >
-              <div className="font-heading font-bold text-4xl text-accent mb-2">{stat.value}</div>
+              <div className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl text-accent mb-2">{stat.value}</div>
               <div className="font-body text-muted-foreground">{stat.label}</div>
             </motion.div>
           ))}

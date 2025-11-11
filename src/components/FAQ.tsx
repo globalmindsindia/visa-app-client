@@ -35,7 +35,7 @@ const faqs = [
 
 const FAQ = () => {
   return (
-    <section className="py-20 bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))]">
+    <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
@@ -64,7 +64,7 @@ const FAQ = () => {
               >
                 <AccordionItem 
                   value={`item-${index}`}
-                  className="bg-card border-2 rounded-lg px-6 hover:border-primary/50 transition-colors"
+                  className="bg-card border-2 rounded-lg px-4 sm:px-6 hover:border-primary/50 transition-colors"
                 >
                 <AccordionTrigger className="font-heading font-semibold text-left hover:text-primary">
                   {faq.question}

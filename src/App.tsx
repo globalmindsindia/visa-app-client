@@ -21,6 +21,9 @@ import SingaporeRequirements from "./pages/SingaporeRequirements";
 import UAERequirements from "./pages/UAERequirements";
 import SouthKoreaRequirements from "./pages/SouthKoreaRequirements";
 import JapanRequirements from "./pages/JapanRequirements";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
+import RefundPolicy from "./pages/RefundPolicy";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +51,9 @@ const App = () => (
           <Route path="/uae-requirements" element={<UAERequirements />} />
           <Route path="/southkorea-requirements" element={<SouthKoreaRequirements />} />
           <Route path="/japan-requirements" element={<JapanRequirements />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-conditions" element={<TermsConditions />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

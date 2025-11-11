@@ -8,14 +8,14 @@ const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))] py-20 sm:py-28">
+    <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))] py-12 sm:py-16 md:py-20 lg:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
           <motion.div 
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="space-y-8"
+            className="space-y-6 sm:space-y-8"
           >
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -74,18 +74,18 @@ const Hero = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7, duration: 0.5 }}
-              className="flex items-center gap-8 pt-4"
+              className="flex flex-wrap items-center gap-4 sm:gap-6 md:gap-8 pt-4"
             >
               <div className="text-center">
-                <div className="font-heading font-bold text-3xl text-primary">98%</div>
+                <div className="font-heading font-bold text-2xl sm:text-3xl text-primary">98%</div>
                 <div className="font-body text-sm text-muted-foreground">Success Rate</div>
               </div>
               <div className="text-center">
-                <div className="font-heading font-bold text-3xl text-primary">15+</div>
+                <div className="font-heading font-bold text-2xl sm:text-3xl text-primary">15+</div>
                 <div className="font-body text-sm text-muted-foreground">Countries</div>
               </div>
               <div className="text-center">
-                <div className="font-heading font-bold text-3xl text-primary">24/7</div>
+                <div className="font-heading font-bold text-2xl sm:text-3xl text-primary">24/7</div>
                 <div className="font-body text-sm text-muted-foreground">Support</div>
               </div>
             </motion.div>

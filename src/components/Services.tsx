@@ -37,14 +37,14 @@ const services = [
 
 const Services = () => {
   return (
-    <section id="services" className="py-20 bg-background">
+    <section id="services" className="py-12 sm:py-16 md:py-20 bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-12 md:mb-16"
         >
           <h2 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
             What We <span className="text-primary">Offer</span>
@@ -54,7 +54,7 @@ const Services = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {services.map((service, index) => (
             <motion.div
               key={index}
@@ -65,7 +65,7 @@ const Services = () => {
               whileHover={{ y: -8 }}
             >
               <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50 h-full">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="mb-4 inline-flex p-3 rounded-lg bg-primary/10 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
                     <service.icon className="h-8 w-8 text-primary group-hover:text-primary-foreground" />
                   </div>

@@ -3,7 +3,8 @@ import { Shield, Lock, Eye, Phone, Mail } from "lucide-react";
 import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import countriesBackground from "@/assets/countries_requirement_background.jpg";
+import countriesBackground from "@/assets/Countries_requirement_background.jpg";
+
 
 const PrivacyPolicy = () => {
   useEffect(() => {

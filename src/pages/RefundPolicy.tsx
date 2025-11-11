@@ -3,7 +3,7 @@ import { RefreshCw, CheckCircle, XCircle, AlertTriangle, Phone, Mail, DollarSign
 import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import countriesBackground from "@/assets/countries_requirement_background.jpg";
+import countriesBackground from "@/assets/Countries_requirement_background.jpg";
 
 const RefundPolicy = () => {
   useEffect(() => {

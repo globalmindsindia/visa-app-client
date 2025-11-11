@@ -3,7 +3,7 @@ import { FileText, Users, CreditCard, Clock, Shield, Phone, Mail } from "lucide-
 import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import countriesBackground from "@/assets/countries_requirement_background.jpg";
+import countriesBackground from "@/assets/Countries_requirement_background.jpg";
 
 const TermsConditions = () => {
   useEffect(() => {

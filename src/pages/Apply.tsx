@@ -44,12 +44,97 @@ const Apply = () => {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    phone: ""
+  });
 
   const totalSteps = 4;
   const progress = (step / totalSteps) * 100;
 
+  const validateName = (name: string) => {
+    if (name.length < 3) return "Name must be minimum 3 letters";
+    if (/\d/.test(name)) return "Name cannot contain numbers";
+    if (/[^a-zA-Z\s]/.test(name)) return "Name cannot contain special characters";
+    return "";
+  };
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return "Please enter a valid email address";
+    return "";
+  };
+
+  const validatePhone = (phone: string) => {
+    const cleanPhone = phone.replace(/^\+?91\s?/, "");
+    
+    if (cleanPhone.length !== 10) {
+      return "Phone number should have exactly 10 digits";
+    }
+    
+    if (!/^[6-9]/.test(cleanPhone)) {
+      return "Phone number should start with 6, 7, 8 or 9";
+    }
+    
+    if (!/^\d+$/.test(cleanPhone)) {
+      return "Phone number should contain only numbers";
+    }
+    
+    // Check for 5 consecutive same numbers
+    for (let i = 0; i <= cleanPhone.length - 5; i++) {
+      const substring = cleanPhone.substring(i, i + 5);
+      if (substring.split('').every(digit => digit === substring[0])) {
+        return "Phone number cannot have 5 consecutive same numbers";
+      }
+    }
+    
+    return "";
+  };
+
   const handleInputChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
+    let processedValue = value;
+    
+    // Handle name field - only allow letters and spaces
+    if (field === "name") {
+      processedValue = value.replace(/[^a-zA-Z\s]/g, "");
+    }
+    
+    // Handle phone field - prefix with +91 and only allow digits
+    if (field === "phone") {
+      // Remove any non-digit characters except +
+      let cleanValue = value.replace(/[^\d+]/g, "");
+      
+      // If user starts typing without +91, add it
+      if (cleanValue && !cleanValue.startsWith("+91")) {
+        if (cleanValue.startsWith("91")) {
+          cleanValue = "+" + cleanValue;
+        } else {
+          cleanValue = "+91" + cleanValue.replace(/^\+/, "");
+        }
+      }
+      
+      // Limit to +91 + 10 digits
+      if (cleanValue.length > 13) {
+        cleanValue = cleanValue.substring(0, 13);
+      }
+      
+      processedValue = cleanValue;
+    }
+    
+    setFormData({ ...formData, [field]: processedValue });
+    
+    // Validate and set errors
+    let error = "";
+    if (field === "name" && processedValue) {
+      error = validateName(processedValue);
+    } else if (field === "email" && processedValue) {
+      error = validateEmail(processedValue);
+    } else if (field === "phone" && processedValue) {
+      error = validatePhone(processedValue);
+    }
+    
+    setErrors(prev => ({ ...prev, [field]: error }));
     
     // Reset dependent fields when country changes
     if (field === "country") {
@@ -169,6 +254,21 @@ const Apply = () => {
     if (step === 1) {
       if (!formData.name || !formData.email || !formData.phone || !formData.city) {
         toast.error("Please fill all personal details");
+        return false;
+      }
+      
+      // Check for validation errors
+      const nameError = validateName(formData.name);
+      const emailError = validateEmail(formData.email);
+      const phoneError = validatePhone(formData.phone);
+      
+      if (nameError || emailError || phoneError) {
+        setErrors({
+          name: nameError,
+          email: emailError,
+          phone: phoneError
+        });
+        toast.error("Please fix the validation errors");
         return false;
       }
     }
@@ -336,7 +436,11 @@ const Apply = () => {
                       placeholder="Enter your full name"
                       value={formData.name}
                       onChange={(e) => handleInputChange("name", e.target.value)}
+                      className={errors.name ? "border-red-500" : ""}
                     />
+                    {errors.name && (
+                      <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="email">Email *</Label>
@@ -346,7 +450,11 @@ const Apply = () => {
                       placeholder="your.email@example.com"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
+                      className={errors.email ? "border-red-500" : ""}
                     />
+                    {errors.email && (
+                      <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="phone">Phone Number *</Label>
@@ -356,7 +464,11 @@ const Apply = () => {
                       placeholder="+91 1234567890"
                       value={formData.phone}
                       onChange={(e) => handleInputChange("phone", e.target.value)}
+                      className={errors.phone ? "border-red-500" : ""}
                     />
+                    {errors.phone && (
+                      <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="city">City *</Label>

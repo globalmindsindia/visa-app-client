@@ -394,7 +394,7 @@ const Apply = () => {
                       animate={{ scale: 1 }}
                       transition={{ type: "spring", stiffness: 200 }}
                     >
-                      Academic Details
+                      Admission Details
                     </motion.span>
                   )}
                   {step === 3 && (

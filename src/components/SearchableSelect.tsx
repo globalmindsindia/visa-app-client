@@ -14,6 +14,9 @@ interface SearchableSelectProps {
   onAddNew?: (newItem: string) => void;
   disabled?: boolean;
   required?: boolean;
+
+  /** NEW: allow create option always for country */
+  isCountry?: boolean;
 }
 
 const SearchableSelect = ({
@@ -25,31 +28,30 @@ const SearchableSelect = ({
   onAddNew,
   disabled = false,
   required = false,
+  isCountry = false,
 }: SearchableSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showAddNew, setShowAddNew] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Sort options alphabetically
   const sortedOptions = [...options].sort((a, b) => a.localeCompare(b));
 
-  // Filter options based on search term
-  const filteredOptions = sortedOptions.filter(option =>
+  const filteredOptions = sortedOptions.filter((option) =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Check if search term matches any existing option
-  const exactMatch = sortedOptions.some(option => 
-    option.toLowerCase() === searchTerm.toLowerCase()
+  const exactMatch = sortedOptions.some(
+    (option) => option.toLowerCase() === searchTerm.toLowerCase()
   );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
         setSearchTerm("");
-        setShowAddNew(false);
       }
     };
 
@@ -61,34 +63,46 @@ const SearchableSelect = ({
     onValueChange(option);
     setIsOpen(false);
     setSearchTerm("");
-    setShowAddNew(false);
   };
 
   const handleAddNew = () => {
-    if (searchTerm.trim() && onAddNew && !exactMatch) {
+    if (searchTerm.trim() && onAddNew) {
       onAddNew(searchTerm.trim());
       onValueChange(searchTerm.trim());
       setIsOpen(false);
       setSearchTerm("");
-      setShowAddNew(false);
     }
   };
 
+  const showCreateButton =
+    onAddNew &&
+    searchTerm.trim().length > 0 &&
+    (isCountry ? true : !exactMatch);
+
   return (
     <div className="space-y-2" ref={dropdownRef}>
-      <Label>{label} {required && "*"}</Label>
+      <Label>
+        {label} {required && "*"}
+      </Label>
+
       <div className="relative">
         <Button
           type="button"
           variant="outline"
-          className={`w-full justify-between ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`w-full justify-between ${
+            disabled ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
         >
           <span className={value ? "text-foreground" : "text-muted-foreground"}>
             {value || placeholder}
           </span>
-          <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+          <ChevronDown
+            className={`h-4 w-4 transition-transform ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
         </Button>
 
         <AnimatePresence>
@@ -106,10 +120,7 @@ const SearchableSelect = ({
                   <Input
                     placeholder="Search..."
                     value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setShowAddNew(e.target.value.trim().length > 0 && !exactMatch);
-                    }}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-8"
                     autoFocus
                   />
@@ -139,7 +150,7 @@ const SearchableSelect = ({
                 )}
               </div>
 
-              {onAddNew && searchTerm.trim() && !exactMatch && (
+              {showCreateButton && (
                 <div className="border-t p-2">
                   <Button
                     type="button"

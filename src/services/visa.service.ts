@@ -42,16 +42,26 @@ export const visaService = {
   async uploadDocument(
     file: File,
     meta: {
-      firstName: string;
       leadId: string;
       visaApplicantId: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      phoneNumber: string;
+      city: string;
+      country: string;
+      universityName: string;
+      courseName: string;
+      intake: string;
     }
   ) {
     const form = new FormData();
     form.append("file", file);
-    form.append("firstName", meta.firstName);
-    form.append("leadId", meta.leadId);
-    form.append("visaApplicantId", meta.visaApplicantId);
+
+    // Append all metadata
+    Object.entries(meta).forEach(([key, value]) => {
+      form.append(key, value as string);
+    });
 
     const { data } = await getApi().post(
       "/v1/document-uploads/upload-admission-letter",
@@ -67,15 +77,11 @@ export const visaService = {
   // =====================================================
   // STEP 4 - CREATE USER AFTER PAYMENT
   // =====================================================
-  async createUserAfterPayment(payload: {
-    leadId: string;
-    visaApplicantId: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber: string;
-  }) {
-    const { data } = await getApi().post("/v1/visa/payment-success", payload);
+  async completePayment(payload: { leadId: string; visaApplicantId: string }) {
+    const { data } = await getApi().post(
+      "/v1/visa-applicants/complete-payment",
+      payload
+    );
     return data;
   },
 

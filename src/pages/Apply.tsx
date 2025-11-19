@@ -543,14 +543,20 @@ const Apply = () => {
     if (step === 3) {
       visaService
         .uploadDocument(formData.document!, {
-          firstName: formData.firstName,
           leadId,
           visaApplicantId,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phone,
+          city: formData.city,
+          country: formData.country,
+          universityName: formData.university,
+          courseName: formData.course,
+          intake: formData.intake,
         })
         .then(() => console.log("Document uploaded in background"))
-        .catch((err) =>
-          console.error("Document upload failed in background:", err)
-        );
+        .catch((err) => console.error("Document upload failed:", err));
 
       toast.success("Document submitted! Uploading in background.");
       setStep(4);
@@ -622,13 +628,9 @@ const Apply = () => {
       // =====================================================
       // 3. Call BACKEND to complete Visa Application
       // =====================================================
-      await visaService.createUserAfterPayment({
+      await visaService.completePayment({
         leadId,
         visaApplicantId,
-        firstName,
-        lastName,
-        email,
-        phoneNumber,
       });
 
       toast.success("Visa Application Completed!");

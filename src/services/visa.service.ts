@@ -77,7 +77,12 @@ export const visaService = {
   // =====================================================
   // STEP 4 - CREATE USER AFTER PAYMENT
   // =====================================================
-  async completePayment(payload: { leadId: string; visaApplicantId: string }) {
+  async completePayment(payload: {
+    leadId: string;
+    visaApplicantId: string;
+    paymentId: string;
+    amount: number;
+  }) {
     const { data } = await getApi().post(
       "/v1/visa-applicants/complete-payment",
       payload

@@ -27,6 +27,7 @@ import {
   MessageCircle,
   Tag,
   Percent,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -91,7 +92,7 @@ const Apply = () => {
   const [hasMoreUniversities, setHasMoreUniversities] = useState(true);
   const [leadId, setLeadId] = useState<string>("");
   const [visaApplicantId, setVisaApplicantId] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const FEES = {
     application: 5000,
@@ -558,7 +559,7 @@ const Apply = () => {
         .then(() => console.log("Document uploaded in background"))
         .catch((err) => console.error("Document upload failed:", err));
 
-      toast.success("Document submitted! Uploading in background.");
+      // toast.success("Document submitted! Uploading in background.");
       setStep(4);
       window.scrollTo(0, 0);
       return;
@@ -570,12 +571,16 @@ const Apply = () => {
     }
   };
 
-  const handlePostPaymentOperations = async () => {
+  const handlePostPaymentOperations = async (
+    paymentId: string,
+    amount: number
+  ) => {
+    setLoading(true); // <-- SHOW LOADER
     const { firstName, lastName, email, phoneNumber } = personalInfo;
 
     try {
       // =====================================================
-      // 1. Create APS USER (or ignore duplicate)
+      // 1. Create APS USER (ignore duplicate)
       // =====================================================
       try {
         await visaService.storeApsUser({
@@ -606,7 +611,7 @@ const Apply = () => {
             Email: email,
             Phone: phoneNumber,
           },
-          userTypeId: "6689208000001267117", // VISA type inside Zoho
+          userTypeId: "6689208000001267117", // VISA type in Zoho
         });
 
         if (
@@ -626,25 +631,30 @@ const Apply = () => {
       }
 
       // =====================================================
-      // 3. Call BACKEND to complete Visa Application
+      // 3. Complete Visa Application in Backend
       // =====================================================
       await visaService.completePayment({
         leadId,
         visaApplicantId,
+        paymentId,
+        amount,
       });
 
       toast.success("Visa Application Completed!");
+      setLoading(false);
       navigate("/success");
     } catch (error: any) {
-      toast.error(
+      console.error(
         error?.response?.data?.message ||
           "We could not complete your registration. Please contact support."
       );
+    } finally {
+      setLoading(false); // make sure loader is cleared
     }
   };
 
   const handleFinalSubmission = async () => {
-    setIsLoading(true);
+    setLoading(true);
 
     try {
       const { firstName, lastName, email, phoneNumber } = personalInfo;
@@ -655,7 +665,7 @@ const Apply = () => {
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
         toast.error("Failed to load payment gateway. Please try again.");
-        setIsLoading(false);
+        setLoading(false);
         return;
       }
 
@@ -672,11 +682,10 @@ const Apply = () => {
 
       if (!order || !order.order_id) {
         toast.error("Unable to create payment order. Please try again.");
-        setIsLoading(false);
+        setLoading(false);
         return;
       }
 
-      // Razorpay Checkout
       const options = {
         key: order.razorpay_key_id,
         amount: order.amount,
@@ -693,9 +702,10 @@ const Apply = () => {
 
         theme: { color: "#3B82F6" },
 
+        // Razorpay Callback
         handler: async function (response: any) {
           try {
-            // Verify payment on backend
+            // Verify payment
             const verify = await paymentService.verifyPayment({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -705,7 +715,12 @@ const Apply = () => {
 
             if (verify?.success) {
               toast.success("Payment successful!");
-              await handlePostPaymentOperations();
+
+              // Pass paymentId + amount
+              await handlePostPaymentOperations(
+                response.razorpay_payment_id,
+                order.amount
+              );
             } else {
               toast.error("Payment verification failed.");
             }
@@ -718,7 +733,7 @@ const Apply = () => {
 
         modal: {
           ondismiss: function () {
-            setIsLoading(false);
+            setLoading(false);
           },
         },
       };
@@ -727,875 +742,894 @@ const Apply = () => {
       razorpay.open();
     } catch (err: any) {
       toast.error(err?.message || "Payment failed. Please try again.");
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${ApplicationStepsBackground})` }}
-      />
-      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm" />
-      <div className="relative z-10">
-        <main className="flex-grow py-12">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mb-8"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <Button
-                    variant="outline"
-                    onClick={handleBackToHome}
-                    className="flex items-center gap-2 hover:bg-primary/10 hover:text-primary transition-all duration-300 hover:scale-105"
-                  >
-                    <Home className="h-4 w-4" />
-                    Back to Home
-                  </Button>
-                </motion.div>
-                <div className="flex-1" />
-              </div>
+    <>
+      {loading && (
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="mt-4 font-medium">Processing your application...</p>
+        </div>
+      )}
 
-              <div className="text-center">
-                <h1 className="font-heading font-bold text-3xl sm:text-4xl text-foreground mb-2">
-                  Visa Application Form
-                </h1>
-                <p className="font-body text-muted-foreground">
-                  Step {step} of {totalSteps}
-                </p>
-              </div>
-              <Progress value={progress} className="mt-4" />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Card className="border-2">
-                <CardHeader>
+      <div className="min-h-screen relative flex flex-col">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${ApplicationStepsBackground})` }}
+        />
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm" />
+        <div className="relative z-10">
+          <main className="flex-grow py-12">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mb-8"
+              >
+                <div className="flex items-center justify-between mb-4">
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-center"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
                   >
-                    <CardTitle className="font-heading text-2xl text-primary">
-                      {step === 1 && (
-                        <motion.span
-                          initial={{ scale: 0.9 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 200 }}
-                        >
-                          Personal Details
-                        </motion.span>
-                      )}
-                      {step === 2 && (
-                        <motion.span
-                          initial={{ scale: 0.9 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 200 }}
-                        >
-                          Academic Details
-                        </motion.span>
-                      )}
-                      {step === 3 && (
-                        <motion.span
-                          initial={{ scale: 0.9 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 200 }}
-                        >
-                          Document Upload
-                        </motion.span>
-                      )}
-                      {step === 4 && (
-                        <motion.span
-                          initial={{ scale: 0.9 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 200 }}
-                        >
-                          Payment
-                        </motion.span>
-                      )}
-                    </CardTitle>
+                    <Button
+                      variant="outline"
+                      onClick={handleBackToHome}
+                      className="flex items-center gap-2 hover:bg-primary/10 hover:text-primary transition-all duration-300 hover:scale-105"
+                    >
+                      <Home className="h-4 w-4" />
+                      Back to Home
+                    </Button>
                   </motion.div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <AnimatePresence mode="wait">
-                    {step === 1 && (
-                      <motion.div
-                        key="step1"
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -50 }}
-                        transition={{ duration: 0.3 }}
-                        className="space-y-4"
-                      >
-                        {/* FIRST NAME */}
-                        <div>
-                          <Label htmlFor="firstName">First Name *</Label>
-                          <Input
-                            id="firstName"
-                            placeholder="Enter your first name"
-                            value={formData.firstName}
-                            onChange={(e) =>
-                              handleInputChange("firstName", e.target.value)
-                            }
-                            className={errors.firstName ? "border-red-500" : ""}
-                          />
-                          {errors.firstName && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.firstName}
-                            </p>
-                          )}
-                        </div>
+                  <div className="flex-1" />
+                </div>
 
-                        {/* LAST NAME */}
-                        <div>
-                          <Label htmlFor="lastName">Last Name *</Label>
-                          <Input
-                            id="lastName"
-                            placeholder="Enter your last name"
-                            value={formData.lastName}
-                            onChange={(e) =>
-                              handleInputChange("lastName", e.target.value)
-                            }
-                            className={errors.lastName ? "border-red-500" : ""}
-                          />
-                          {errors.lastName && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.lastName}
-                            </p>
-                          )}
-                        </div>
+                <div className="text-center">
+                  <h1 className="font-heading font-bold text-3xl sm:text-4xl text-foreground mb-2">
+                    Visa Application Form
+                  </h1>
+                  <p className="font-body text-muted-foreground">
+                    Step {step} of {totalSteps}
+                  </p>
+                </div>
+                <Progress value={progress} className="mt-4" />
+              </motion.div>
 
-                        {/* EMAIL */}
-                        <div>
-                          <Label htmlFor="email">Email *</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            placeholder="your.email@example.com"
-                            value={formData.email}
-                            onChange={(e) =>
-                              handleInputChange("email", e.target.value)
-                            }
-                            className={errors.email ? "border-red-500" : ""}
-                          />
-                          {errors.email && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.email}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* PHONE */}
-                        <div>
-                          <Label htmlFor="phone">Phone Number *</Label>
-                          <Input
-                            id="phone"
-                            type="tel"
-                            placeholder="+91 1234567890"
-                            value={formData.phone}
-                            onChange={(e) =>
-                              handleInputChange("phone", e.target.value)
-                            }
-                            className={errors.phone ? "border-red-500" : ""}
-                          />
-                          {errors.phone && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.phone}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* CITY */}
-                        <div>
-                          <Label htmlFor="city">City *</Label>
-                          <Input
-                            id="city"
-                            placeholder="Enter your city"
-                            value={formData.city}
-                            onChange={(e) =>
-                              handleInputChange("city", e.target.value)
-                            }
-                          />
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {step === 2 && (
-                      <motion.div
-                        key="step2"
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -50 }}
-                        transition={{ duration: 0.3 }}
-                        className="space-y-4"
-                      >
-                        {/* COUNTRY FROM DATABASE */}
-                        <SearchableSelect
-                          label="Country"
-                          placeholder="Select country"
-                          value={formData.country}
-                          options={countries} // <-- DB Countries
-                          onValueChange={(value) =>
-                            handleInputChange("country", value)
-                          }
-                          required
-                        />
-
-                        {/* UNIVERSITIES FROM DATABASE */}
-                        <SearchableSelect
-                          label="University Name"
-                          placeholder={
-                            formData.country
-                              ? "Select or search university"
-                              : "Select country first"
-                          }
-                          value={formData.university}
-                          options={universities} // <-- DB Universities
-                          onValueChange={(value) =>
-                            handleInputChange("university", value)
-                          }
-                          disabled={!formData.country}
-                          required
-                        />
-
-                        {/* COURSES FROM DATABASE */}
-                        <SearchableSelect
-                          label="Course / Program"
-                          placeholder={
-                            formData.country
-                              ? "Select or search course"
-                              : "Select country first"
-                          }
-                          value={formData.course}
-                          options={courses} // <-- DB Courses
-                          onValueChange={(value) =>
-                            handleInputChange("course", value)
-                          }
-                          disabled={!formData.country}
-                          required
-                        />
-
-                        {/* INTAKE — REMAINS SAME */}
-                        <div>
-                          <Label htmlFor="intake">Intake *</Label>
-                          <Select
-                            value={formData.intake}
-                            onValueChange={(value) =>
-                              handleInputChange("intake", value)
-                            }
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="border-2">
+                  <CardHeader>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-center"
+                    >
+                      <CardTitle className="font-heading text-2xl text-primary">
+                        {step === 1 && (
+                          <motion.span
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 200 }}
                           >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select intake" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="summer">summer</SelectItem>
-                              <SelectItem value="Winter/Fall">
-                                Winter/Fall
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </motion.div>
-                    )}
+                            Personal Details
+                          </motion.span>
+                        )}
+                        {step === 2 && (
+                          <motion.span
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 200 }}
+                          >
+                            Academic Details
+                          </motion.span>
+                        )}
+                        {step === 3 && (
+                          <motion.span
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 200 }}
+                          >
+                            Document Upload
+                          </motion.span>
+                        )}
+                        {step === 4 && (
+                          <motion.span
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 200 }}
+                          >
+                            Payment
+                          </motion.span>
+                        )}
+                      </CardTitle>
+                    </motion.div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <AnimatePresence mode="wait">
+                      {step === 1 && (
+                        <motion.div
+                          key="step1"
+                          initial={{ opacity: 0, x: 50 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -50 }}
+                          transition={{ duration: 0.3 }}
+                          className="space-y-4"
+                        >
+                          {/* FIRST NAME */}
+                          <div>
+                            <Label htmlFor="firstName">First Name *</Label>
+                            <Input
+                              id="firstName"
+                              placeholder="Enter your first name"
+                              value={formData.firstName}
+                              onChange={(e) =>
+                                handleInputChange("firstName", e.target.value)
+                              }
+                              className={
+                                errors.firstName ? "border-red-500" : ""
+                              }
+                            />
+                            {errors.firstName && (
+                              <p className="text-red-500 text-sm mt-1">
+                                {errors.firstName}
+                              </p>
+                            )}
+                          </div>
 
-                    {step === 3 && (
-                      <motion.div
-                        key="step3"
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -50 }}
-                        transition={{ duration: 0.3 }}
-                        className="space-y-4"
-                      >
-                        <div>
-                          <Label htmlFor="document">
-                            Upload Admission / Acceptance Letter *
-                          </Label>
-                          <div className="mt-2">
-                            <div
-                              className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors"
-                              onDragOver={handleDragOver}
-                              onDragEnter={handleDragEnter}
-                              onDragLeave={handleDragLeave}
-                              onDrop={handleDrop}
-                            >
-                              <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                              <p className="font-body text-sm text-muted-foreground mb-2">
-                                {formData.document
-                                  ? formData.document.name
-                                  : "Drag and drop your file here"}
+                          {/* LAST NAME */}
+                          <div>
+                            <Label htmlFor="lastName">Last Name *</Label>
+                            <Input
+                              id="lastName"
+                              placeholder="Enter your last name"
+                              value={formData.lastName}
+                              onChange={(e) =>
+                                handleInputChange("lastName", e.target.value)
+                              }
+                              className={
+                                errors.lastName ? "border-red-500" : ""
+                              }
+                            />
+                            {errors.lastName && (
+                              <p className="text-red-500 text-sm mt-1">
+                                {errors.lastName}
                               </p>
-                              <p className="font-body text-xs text-muted-foreground mb-4">
-                                PDF, JPG, PNG (max. 10MB)
+                            )}
+                          </div>
+
+                          {/* EMAIL */}
+                          <div>
+                            <Label htmlFor="email">Email *</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              placeholder="your.email@example.com"
+                              value={formData.email}
+                              onChange={(e) =>
+                                handleInputChange("email", e.target.value)
+                              }
+                              className={errors.email ? "border-red-500" : ""}
+                            />
+                            {errors.email && (
+                              <p className="text-red-500 text-sm mt-1">
+                                {errors.email}
                               </p>
-                              <motion.div
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                              >
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  onClick={() =>
-                                    document
-                                      .getElementById("file-upload")
-                                      ?.click()
-                                  }
-                                  className="bg-primary text-white hover:bg-primary/90 border-primary"
-                                >
-                                  {formData.document
-                                    ? "Change File"
-                                    : "Choose File"}
-                                </Button>
-                              </motion.div>
-                            </div>
-                            <input
-                              id="file-upload"
-                              type="file"
-                              className="hidden"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              onChange={handleFileChange}
+                            )}
+                          </div>
+
+                          {/* PHONE */}
+                          <div>
+                            <Label htmlFor="phone">Phone Number *</Label>
+                            <Input
+                              id="phone"
+                              type="tel"
+                              placeholder="+91 1234567890"
+                              value={formData.phone}
+                              onChange={(e) =>
+                                handleInputChange("phone", e.target.value)
+                              }
+                              className={errors.phone ? "border-red-500" : ""}
+                            />
+                            {errors.phone && (
+                              <p className="text-red-500 text-sm mt-1">
+                                {errors.phone}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* CITY */}
+                          <div>
+                            <Label htmlFor="city">City *</Label>
+                            <Input
+                              id="city"
+                              placeholder="Enter your city"
+                              value={formData.city}
+                              onChange={(e) =>
+                                handleInputChange("city", e.target.value)
+                              }
                             />
                           </div>
-                          {formData.document && (
-                            <div className="mt-4 p-4 bg-primary/10 rounded-lg flex items-center gap-2">
-                              <Check className="h-5 w-5 text-primary" />
-                              <span className="font-body text-sm">
-                                Document uploaded successfully
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
+                        </motion.div>
+                      )}
 
-                    {step === 4 && (
-                      <motion.div
-                        key="step4"
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -50 }}
-                        transition={{ duration: 0.3 }}
-                        className="space-y-6"
-                      >
-                        {/* PAYMENT SUMMARY */}
-                        <div className="bg-muted p-6 rounded-lg">
-                          <h3 className="font-heading font-semibold text-lg mb-4">
-                            Payment Summary
-                          </h3>
+                      {step === 2 && (
+                        <motion.div
+                          key="step2"
+                          initial={{ opacity: 0, x: 50 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -50 }}
+                          transition={{ duration: 0.3 }}
+                          className="space-y-4"
+                        >
+                          {/* COUNTRY FROM DATABASE */}
+                          <SearchableSelect
+                            label="Country"
+                            placeholder="Select country"
+                            value={formData.country}
+                            options={countries} // <-- DB Countries
+                            onValueChange={(value) =>
+                              handleInputChange("country", value)
+                            }
+                            required
+                          />
 
-                          <div className="space-y-2 font-body">
-                            <div className="flex justify-between">
-                              <span>Application Processing Fee</span>
-                              <span>₹{FEES.application.toLocaleString()}</span>
-                            </div>
+                          {/* UNIVERSITIES FROM DATABASE */}
+                          <SearchableSelect
+                            label="University Name"
+                            placeholder={
+                              formData.country
+                                ? "Select or search university"
+                                : "Select country first"
+                            }
+                            value={formData.university}
+                            options={universities} // <-- DB Universities
+                            onValueChange={(value) =>
+                              handleInputChange("university", value)
+                            }
+                            disabled={!formData.country}
+                            required
+                          />
 
-                            <div className="flex justify-between">
-                              <span>Document Verification</span>
-                              <span>₹{FEES.verification.toLocaleString()}</span>
-                            </div>
+                          {/* COURSES FROM DATABASE */}
+                          <SearchableSelect
+                            label="Course / Program"
+                            placeholder={
+                              formData.country
+                                ? "Select or search course"
+                                : "Select country first"
+                            }
+                            value={formData.course}
+                            options={courses} // <-- DB Courses
+                            onValueChange={(value) =>
+                              handleInputChange("course", value)
+                            }
+                            disabled={!formData.country}
+                            required
+                          />
 
-                            <div className="flex justify-between">
-                              <span>Counselor Support</span>
-                              <span>₹{FEES.counselor.toLocaleString()}</span>
-                            </div>
+                          {/* INTAKE — REMAINS SAME */}
+                          <div>
+                            <Label htmlFor="intake">Intake *</Label>
+                            <Select
+                              value={formData.intake}
+                              onValueChange={(value) =>
+                                handleInputChange("intake", value)
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select intake" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="summer">summer</SelectItem>
+                                <SelectItem value="Winter/Fall">
+                                  Winter/Fall
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </motion.div>
+                      )}
 
-                            <div className="border-t pt-2 mt-2">
-                              <div className="flex justify-between">
-                                <span>Subtotal</span>
-                                <span>₹{SUBTOTAL.toLocaleString()}</span>
-                              </div>
-
-                              {appliedCoupon && (
+                      {step === 3 && (
+                        <motion.div
+                          key="step3"
+                          initial={{ opacity: 0, x: 50 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -50 }}
+                          transition={{ duration: 0.3 }}
+                          className="space-y-4"
+                        >
+                          <div>
+                            <Label htmlFor="document">
+                              Upload Admission / Acceptance Letter *
+                            </Label>
+                            <div className="mt-2">
+                              <div
+                                className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors"
+                                onDragOver={handleDragOver}
+                                onDragEnter={handleDragEnter}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                              >
+                                <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                                <p className="font-body text-sm text-muted-foreground mb-2">
+                                  {formData.document
+                                    ? formData.document.name
+                                    : "Drag and drop your file here"}
+                                </p>
+                                <p className="font-body text-xs text-muted-foreground mb-4">
+                                  PDF, JPG, PNG (max. 10MB)
+                                </p>
                                 <motion.div
-                                  initial={{ opacity: 0, y: -10 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  className="flex justify-between text-green-600 mt-1"
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
                                 >
-                                  <span className="flex items-center gap-1">
-                                    <Percent className="h-4 w-4" />
-                                    Discount ({appliedCoupon})
-                                  </span>
-                                  <span>-₹{discount.toLocaleString()}</span>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() =>
+                                      document
+                                        .getElementById("file-upload")
+                                        ?.click()
+                                    }
+                                    className="bg-primary text-white hover:bg-primary/90 border-primary"
+                                  >
+                                    {formData.document
+                                      ? "Change File"
+                                      : "Choose File"}
+                                  </Button>
                                 </motion.div>
-                              )}
+                              </div>
+                              <input
+                                id="file-upload"
+                                type="file"
+                                className="hidden"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={handleFileChange}
+                              />
+                            </div>
+                            {formData.document && (
+                              <div className="mt-4 p-4 bg-primary/10 rounded-lg flex items-center gap-2">
+                                <Check className="h-5 w-5 text-primary" />
+                                <span className="font-body text-sm">
+                                  Document uploaded successfully
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
 
-                              <div className="flex justify-between font-semibold text-lg mt-2 pt-2 border-t">
-                                <span>Total Amount</span>
-                                <span
-                                  className={
-                                    appliedCoupon
-                                      ? "text-green-600"
-                                      : "text-primary"
-                                  }
-                                >
-                                  ₹{getFinalAmount().toLocaleString()}
+                      {step === 4 && (
+                        <motion.div
+                          key="step4"
+                          initial={{ opacity: 0, x: 50 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -50 }}
+                          transition={{ duration: 0.3 }}
+                          className="space-y-6"
+                        >
+                          {/* PAYMENT SUMMARY */}
+                          <div className="bg-muted p-6 rounded-lg">
+                            <h3 className="font-heading font-semibold text-lg mb-4">
+                              Payment Summary
+                            </h3>
+
+                            <div className="space-y-2 font-body">
+                              <div className="flex justify-between">
+                                <span>Application Processing Fee</span>
+                                <span>
+                                  ₹{FEES.application.toLocaleString()}
                                 </span>
                               </div>
 
-                              {appliedCoupon && (
-                                <motion.div
-                                  initial={{ scale: 0.8, opacity: 0 }}
-                                  animate={{ scale: 1, opacity: 1 }}
-                                  className="text-sm text-green-600 text-right mt-1"
-                                >
-                                  You saved ₹{discount.toLocaleString()}!
-                                </motion.div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                              <div className="flex justify-between">
+                                <span>Document Verification</span>
+                                <span>
+                                  ₹{FEES.verification.toLocaleString()}
+                                </span>
+                              </div>
 
-                        {/* COUPON SECTION */}
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2 }}
-                          className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-6"
-                        >
-                          <div className="flex items-center gap-2 mb-4">
-                            <Tag className="h-5 w-5 text-orange-600" />
-                            <h4 className="font-semibold text-gray-900">
-                              Have a coupon code?
-                            </h4>
-                          </div>
+                              <div className="flex justify-between">
+                                <span>Counselor Support</span>
+                                <span>₹{FEES.counselor.toLocaleString()}</span>
+                              </div>
 
-                          <div className="space-y-4">
-                            {/* COUPON INPUT */}
-                            <div className="relative">
-                              <Input
-                                placeholder="Enter coupon code"
-                                value={couponCode}
-                                onChange={(e) =>
-                                  setCouponCode(e.target.value.toUpperCase())
-                                }
-                                className="pr-20"
-                              />
-
-                              {couponCode && (
-                                <motion.button
-                                  initial={{ opacity: 0, scale: 0.8 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  onClick={clearCoupon}
-                                  className="absolute right-3 inset-y-0 my-auto text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100"
-                                >
-                                  <X className="h-4 w-4" />
-                                </motion.button>
-                              )}
-                            </div>
-
-                            {/* COUPON CARD — GMI10 */}
-                            <motion.div
-                              className="bg-white rounded-lg p-4 border border-orange-200"
-                              whileHover={{ scale: 1.02 }}
-                              transition={{ type: "spring", stiffness: 400 }}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-1 rounded text-sm font-bold">
-                                      GMI10
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-700">
-                                      {COUPONS["GMI10"].value}% OFF
-                                    </span>
-                                  </div>
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    {COUPONS["GMI10"].description}
-                                  </p>
+                              <div className="border-t pt-2 mt-2">
+                                <div className="flex justify-between">
+                                  <span>Subtotal</span>
+                                  <span>₹{SUBTOTAL.toLocaleString()}</span>
                                 </div>
 
-                                <motion.button
-                                  onClick={() => applyCoupon("GMI10")}
-                                  disabled={appliedCoupon === "GMI10"}
-                                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                                    appliedCoupon === "GMI10"
-                                      ? "bg-green-100 text-green-700 cursor-not-allowed"
-                                      : "bg-orange-500 text-white hover:bg-orange-600 hover:scale-105"
-                                  }`}
-                                  whileHover={
-                                    appliedCoupon !== "GMI10"
-                                      ? { scale: 1.05 }
-                                      : {}
-                                  }
-                                  whileTap={
-                                    appliedCoupon !== "GMI10"
-                                      ? { scale: 0.95 }
-                                      : {}
-                                  }
-                                >
-                                  {appliedCoupon === "GMI10"
-                                    ? "Applied"
-                                    : "Use This"}
-                                </motion.button>
+                                {appliedCoupon && (
+                                  <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="flex justify-between text-green-600 mt-1"
+                                  >
+                                    <span className="flex items-center gap-1">
+                                      <Percent className="h-4 w-4" />
+                                      Discount ({appliedCoupon})
+                                    </span>
+                                    <span>-₹{discount.toLocaleString()}</span>
+                                  </motion.div>
+                                )}
+
+                                <div className="flex justify-between font-semibold text-lg mt-2 pt-2 border-t">
+                                  <span>Total Amount</span>
+                                  <span
+                                    className={
+                                      appliedCoupon
+                                        ? "text-green-600"
+                                        : "text-primary"
+                                    }
+                                  >
+                                    ₹{getFinalAmount().toLocaleString()}
+                                  </span>
+                                </div>
+
+                                {appliedCoupon && (
+                                  <motion.div
+                                    initial={{ scale: 0.8, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    className="text-sm text-green-600 text-right mt-1"
+                                  >
+                                    You saved ₹{discount.toLocaleString()}!
+                                  </motion.div>
+                                )}
                               </div>
-                            </motion.div>
+                            </div>
                           </div>
+
+                          {/* COUPON SECTION */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-6"
+                          >
+                            <div className="flex items-center gap-2 mb-4">
+                              <Tag className="h-5 w-5 text-orange-600" />
+                              <h4 className="font-semibold text-gray-900">
+                                Have a coupon code?
+                              </h4>
+                            </div>
+
+                            <div className="space-y-4">
+                              {/* COUPON INPUT */}
+                              <div className="relative">
+                                <Input
+                                  placeholder="Enter coupon code"
+                                  value={couponCode}
+                                  onChange={(e) =>
+                                    setCouponCode(e.target.value.toUpperCase())
+                                  }
+                                  className="pr-20"
+                                />
+
+                                {couponCode && (
+                                  <motion.button
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    onClick={clearCoupon}
+                                    className="absolute right-3 inset-y-0 my-auto text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </motion.button>
+                                )}
+                              </div>
+
+                              {/* COUPON CARD — GMI10 */}
+                              <motion.div
+                                className="bg-white rounded-lg p-4 border border-orange-200"
+                                whileHover={{ scale: 1.02 }}
+                                transition={{ type: "spring", stiffness: 400 }}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-1 rounded text-sm font-bold">
+                                        GMI10
+                                      </div>
+                                      <span className="text-sm font-medium text-gray-700">
+                                        {COUPONS["GMI10"].value}% OFF
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                      {COUPONS["GMI10"].description}
+                                    </p>
+                                  </div>
+
+                                  <motion.button
+                                    onClick={() => applyCoupon("GMI10")}
+                                    disabled={appliedCoupon === "GMI10"}
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                                      appliedCoupon === "GMI10"
+                                        ? "bg-green-100 text-green-700 cursor-not-allowed"
+                                        : "bg-orange-500 text-white hover:bg-orange-600 hover:scale-105"
+                                    }`}
+                                    whileHover={
+                                      appliedCoupon !== "GMI10"
+                                        ? { scale: 1.05 }
+                                        : {}
+                                    }
+                                    whileTap={
+                                      appliedCoupon !== "GMI10"
+                                        ? { scale: 0.95 }
+                                        : {}
+                                    }
+                                  >
+                                    {appliedCoupon === "GMI10"
+                                      ? "Applied"
+                                      : "Use This"}
+                                  </motion.button>
+                                </div>
+                              </motion.div>
+                            </div>
+                          </motion.div>
+
+                          <p className="font-body text-sm text-muted-foreground text-center">
+                            Secure payment gateway integration will be processed
+                            here
+                          </p>
                         </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                        <p className="font-body text-sm text-muted-foreground text-center">
-                          Secure payment gateway integration will be processed
-                          here
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  <div className="flex gap-4 pt-6">
-                    {step > 1 && (
+                    <div className="flex gap-4 pt-6">
+                      {step > 1 && (
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setStep(step - 1);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className="flex-1"
+                        >
+                          <ArrowLeft className="mr-2 h-4 w-4" />
+                          Previous
+                        </Button>
+                      )}
                       <Button
-                        variant="outline"
-                        onClick={() => {
-                          setStep(step - 1);
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                        }}
-                        className="flex-1"
+                        onClick={handleNext}
+                        disabled={isProcessing}
+                        className="flex-1 bg-primary hover:bg-primary/90"
                       >
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Previous
+                        {isProcessing
+                          ? "Processing..."
+                          : step === totalSteps
+                          ? `Submit & Pay ₹${10000 - discount}`
+                          : "Next"}
+                        <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
-                    )}
-                    <Button
-                      onClick={handleNext}
-                      disabled={isProcessing}
-                      className="flex-1 bg-primary hover:bg-primary/90"
-                    >
-                      {isProcessing
-                        ? "Processing..."
-                        : step === totalSteps
-                        ? `Submit & Pay ₹${10000 - discount}`
-                        : "Next"}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-        </main>
-      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+          </main>
+        </div>
 
-      {/* Help Button */}
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 1, type: "spring", stiffness: 200 }}
-        className="fixed bottom-6 right-6 z-40"
-      >
-        <motion.button
-          onClick={() => setShowHelpModal(true)}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group flex items-center gap-2"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+        {/* Help Button */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 1, type: "spring", stiffness: 200 }}
+          className="fixed bottom-6 right-6 z-40"
         >
-          <motion.div
-            animate={{ rotate: [0, -10, 10, -10, 0] }}
-            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-          >
-            <HelpCircle className="h-5 w-5" />
-          </motion.div>
-          <span className="font-medium text-sm">Help</span>
-          <motion.div
-            initial={{ opacity: 0, x: 10 }}
-            whileHover={{ opacity: 1, x: 0 }}
-            className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap pointer-events-none"
-          >
-            Need Help?
-            <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
-          </motion.div>
-        </motion.button>
-      </motion.div>
-
-      {/* Help Modal */}
-      <AnimatePresence>
-        {showHelpModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowHelpModal(false)}
+          <motion.button
+            onClick={() => setShowHelpModal(true)}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group flex items-center gap-2"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 50 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white rounded-3xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
+              animate={{ rotate: [0, -10, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
             >
-              <div className="relative">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <motion.div
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="bg-white/20 p-2 rounded-full"
-                      >
-                        <MessageCircle className="h-6 w-6" />
-                      </motion.div>
-                      <div>
-                        <h3 className="text-2xl font-bold">Customer Support</h3>
-                        <p className="text-blue-100 text-sm">
-                          We're here to help you succeed!
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowHelpModal(false)}
-                      className="text-white hover:bg-white/20 h-8 w-8 p-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="p-6 space-y-6">
-                  <div className="text-center">
-                    <p className="text-gray-700 text-lg font-medium mb-4">
-                      Need assistance? Our support team is ready to help!
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <motion.div
-                      className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 border border-blue-100"
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ type: "spring", stiffness: 400 }}
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="bg-blue-600 p-2 rounded-full">
-                          <Mail className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900">
-                            Email Support
-                          </h4>
-                        </div>
-                      </div>
-                      <motion.a
-                        href="mailto:connect@globalmindsindia.com"
-                        className="text-blue-600 font-medium hover:text-blue-800 transition-colors block"
-                        whileHover={{ x: 5 }}
-                      >
-                        connect@globalmindsindia.com
-                      </motion.a>
-                    </motion.div>
-
-                    <motion.div
-                      className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-4 border border-green-100"
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ type: "spring", stiffness: 400 }}
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="bg-green-600 p-2 rounded-full">
-                          <Phone className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900">
-                            Phone Support
-                          </h4>
-                        </div>
-                      </div>
-                      <motion.a
-                        href="tel:+917353446655"
-                        className="text-green-600 font-medium hover:text-green-800 transition-colors block"
-                        whileHover={{ x: 5 }}
-                      >
-                        +91 7353446655
-                      </motion.a>
-                    </motion.div>
-                  </div>
-
-                  <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="bg-amber-500 p-2 rounded-full">
-                        <Clock className="h-5 w-5 text-white" />
-                      </div>
-                      <h4 className="font-semibold text-gray-900">
-                        Quick Tips
-                      </h4>
-                    </div>
-                    <div className="space-y-2 text-sm text-gray-700">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span>
-                          <strong>Response time:</strong> Within 2-4 hours
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span>
-                          <strong>Available:</strong> Monday to Saturday, 9 AM -
-                          7 PM
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <motion.div
-                    className="text-center"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      onClick={() => setShowHelpModal(false)}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-2 rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
-                    >
-                      Got it, Thanks!
-                    </Button>
-                  </motion.div>
-                </div>
-              </div>
+              <HelpCircle className="h-5 w-5" />
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Confirmation Dialog */}
-      <AnimatePresence>
-        {showConfirmDialog && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowConfirmDialog(false)}
-          >
+            <span className="font-medium text-sm">Help</span>
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, x: 10 }}
+              whileHover={{ opacity: 1, x: 0 }}
+              className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap pointer-events-none"
             >
-              <div className="relative">
-                <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <motion.div
-                        animate={{ rotate: [0, -10, 10, -10, 0] }}
-                        transition={{
-                          duration: 0.5,
-                          repeat: Infinity,
-                          repeatDelay: 2,
-                        }}
-                      >
-                        <AlertTriangle className="h-8 w-8" />
-                      </motion.div>
-                      <div>
-                        <h3 className="text-xl font-bold">
-                          Application in Progress
-                        </h3>
-                        <p className="text-amber-100 text-sm">
-                          Unsaved progress detected
-                        </p>
+              Need Help?
+              <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
+            </motion.div>
+          </motion.button>
+        </motion.div>
+
+        {/* Help Modal */}
+        <AnimatePresence>
+          {showHelpModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowHelpModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, y: 50 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0, y: 50 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="bg-white rounded-3xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="relative">
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <motion.div
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="bg-white/20 p-2 rounded-full"
+                        >
+                          <MessageCircle className="h-6 w-6" />
+                        </motion.div>
+                        <div>
+                          <h3 className="text-2xl font-bold">
+                            Customer Support
+                          </h3>
+                          <p className="text-blue-100 text-sm">
+                            We're here to help you succeed!
+                          </p>
+                        </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowHelpModal(false)}
+                        className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowConfirmDialog(false)}
-                      className="text-white hover:bg-white/20 h-8 w-8 p-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
                   </div>
-                </div>
 
-                <div className="p-6">
-                  <p className="text-gray-700 mb-6 leading-relaxed">
-                    You have unsaved progress in your visa application. Are you
-                    sure you want to go back to the home page?
-                    <span className="font-semibold text-red-600">
-                      Your current progress will be lost.
-                    </span>
-                  </p>
+                  <div className="p-6 space-y-6">
+                    <div className="text-center">
+                      <p className="text-gray-700 text-lg font-medium mb-4">
+                        Need assistance? Our support team is ready to help!
+                      </p>
+                    </div>
 
-                  <div className="bg-blue-50 rounded-lg p-4 mb-6">
-                    <p className="text-sm font-medium text-blue-900 mb-3">
-                      For any queries, please reach out to us:
-                    </p>
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       <motion.div
-                        className="flex items-center gap-2 text-sm text-blue-800"
-                        whileHover={{ x: 5 }}
+                        className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 border border-blue-100"
+                        whileHover={{ scale: 1.02 }}
                         transition={{ type: "spring", stiffness: 400 }}
                       >
-                        <Mail className="h-4 w-4" />
-                        <span className="font-medium">Email:</span>
-                        <a
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="bg-blue-600 p-2 rounded-full">
+                            <Mail className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">
+                              Email Support
+                            </h4>
+                          </div>
+                        </div>
+                        <motion.a
                           href="mailto:connect@globalmindsindia.com"
-                          className="hover:underline"
+                          className="text-blue-600 font-medium hover:text-blue-800 transition-colors block"
+                          whileHover={{ x: 5 }}
                         >
                           connect@globalmindsindia.com
-                        </a>
+                        </motion.a>
                       </motion.div>
+
                       <motion.div
-                        className="flex items-center gap-2 text-sm text-blue-800"
-                        whileHover={{ x: 5 }}
+                        className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-4 border border-green-100"
+                        whileHover={{ scale: 1.02 }}
                         transition={{ type: "spring", stiffness: 400 }}
                       >
-                        <Phone className="h-4 w-4" />
-                        <span className="font-medium">Phone:</span>
-                        <a href="tel:7353446655" className="hover:underline">
-                          7353446655
-                        </a>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="bg-green-600 p-2 rounded-full">
+                            <Phone className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">
+                              Phone Support
+                            </h4>
+                          </div>
+                        </div>
+                        <motion.a
+                          href="tel:+917353446655"
+                          className="text-green-600 font-medium hover:text-green-800 transition-colors block"
+                          whileHover={{ x: 5 }}
+                        >
+                          +91 7353446655
+                        </motion.a>
                       </motion.div>
                     </div>
-                  </div>
 
-                  <div className="flex gap-3">
+                    <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="bg-amber-500 p-2 rounded-full">
+                          <Clock className="h-5 w-5 text-white" />
+                        </div>
+                        <h4 className="font-semibold text-gray-900">
+                          Quick Tips
+                        </h4>
+                      </div>
+                      <div className="space-y-2 text-sm text-gray-700">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                          <span>
+                            <strong>Response time:</strong> Within 2-4 hours
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                          <span>
+                            <strong>Available:</strong> Monday to Saturday, 9 AM
+                            - 7 PM
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
                     <motion.div
-                      className="flex-1"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      className="text-center"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       <Button
-                        variant="outline"
-                        onClick={() => setShowConfirmDialog(false)}
-                        className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
+                        onClick={() => setShowHelpModal(false)}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-2 rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
                       >
-                        Continue Application
-                      </Button>
-                    </motion.div>
-                    <motion.div
-                      className="flex-1"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Button
-                        variant="destructive"
-                        onClick={() => navigate("/")}
-                        className="w-full bg-red-600 hover:bg-red-700 transition-all duration-300"
-                      >
-                        Yes, Go Back
+                        Got it, Thanks!
                       </Button>
                     </motion.div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          )}
+        </AnimatePresence>
+
+        {/* Confirmation Dialog */}
+        <AnimatePresence>
+          {showConfirmDialog && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowConfirmDialog(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="relative">
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <motion.div
+                          animate={{ rotate: [0, -10, 10, -10, 0] }}
+                          transition={{
+                            duration: 0.5,
+                            repeat: Infinity,
+                            repeatDelay: 2,
+                          }}
+                        >
+                          <AlertTriangle className="h-8 w-8" />
+                        </motion.div>
+                        <div>
+                          <h3 className="text-xl font-bold">
+                            Application in Progress
+                          </h3>
+                          <p className="text-amber-100 text-sm">
+                            Unsaved progress detected
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowConfirmDialog(false)}
+                        className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="p-6">
+                    <p className="text-gray-700 mb-6 leading-relaxed">
+                      You have unsaved progress in your visa application. Are
+                      you sure you want to go back to the home page?
+                      <span className="font-semibold text-red-600">
+                        Your current progress will be lost.
+                      </span>
+                    </p>
+
+                    <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                      <p className="text-sm font-medium text-blue-900 mb-3">
+                        For any queries, please reach out to us:
+                      </p>
+                      <div className="space-y-2">
+                        <motion.div
+                          className="flex items-center gap-2 text-sm text-blue-800"
+                          whileHover={{ x: 5 }}
+                          transition={{ type: "spring", stiffness: 400 }}
+                        >
+                          <Mail className="h-4 w-4" />
+                          <span className="font-medium">Email:</span>
+                          <a
+                            href="mailto:connect@globalmindsindia.com"
+                            className="hover:underline"
+                          >
+                            connect@globalmindsindia.com
+                          </a>
+                        </motion.div>
+                        <motion.div
+                          className="flex items-center gap-2 text-sm text-blue-800"
+                          whileHover={{ x: 5 }}
+                          transition={{ type: "spring", stiffness: 400 }}
+                        >
+                          <Phone className="h-4 w-4" />
+                          <span className="font-medium">Phone:</span>
+                          <a href="tel:7353446655" className="hover:underline">
+                            7353446655
+                          </a>
+                        </motion.div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <motion.div
+                        className="flex-1"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowConfirmDialog(false)}
+                          className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
+                        >
+                          Continue Application
+                        </Button>
+                      </motion.div>
+                      <motion.div
+                        className="flex-1"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Button
+                          variant="destructive"
+                          onClick={() => navigate("/")}
+                          className="w-full bg-red-600 hover:bg-red-700 transition-all duration-300"
+                        >
+                          Yes, Go Back
+                        </Button>
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   );
 };
 

@@ -33,8 +33,8 @@ const Hero = () => {
               transition={{ delay: 0.3, duration: 0.5 }}
               className="font-heading font-bold text-4xl sm:text-5xl lg:text-6xl leading-tight text-foreground"
             >
-              Simplify Your Visa Journey with{" "}
-              <span className="text-primary">Expert Assistance</span>
+              Make Your Visa Process Easy with{" "}
+              <span className="text-primary">Expert Support</span>
             </motion.h1>
             
             <motion.p 
@@ -43,7 +43,7 @@ const Hero = () => {
               transition={{ delay: 0.4, duration: 0.5 }}
               className="font-body text-lg sm:text-xl text-muted-foreground max-w-2xl"
             >
-              Fast, reliable, and student-friendly visa application assistance for global study destinations. Your dream education abroad starts here.
+              We offer speedy, reliable, and student-centric visa assistance for international study. Take the first step toward your dream education abroad.
             </motion.p>
 
             <motion.div 
@@ -77,7 +77,7 @@ const Hero = () => {
               className="flex flex-wrap items-center gap-4 sm:gap-6 md:gap-8 pt-4"
             >
               <div className="text-center">
-                <div className="font-heading font-bold text-2xl sm:text-3xl text-primary">98%</div>
+                <div className="font-heading font-bold text-2xl sm:text-3xl text-primary">99%</div>
                 <div className="font-body text-sm text-muted-foreground">Success Rate</div>
               </div>
               <div className="text-center">

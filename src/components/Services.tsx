@@ -1,12 +1,19 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { GraduationCap, FileCheck, Plane, BookOpen, Users, HeadphonesIcon } from "lucide-react";
+import { CalendarDays, CalendarPlus, Clock } from "lucide-react";
+
 import { motion } from "framer-motion";
 
 const services = [
   {
     icon: GraduationCap,
-    title: "Study Visa Processing",
-    description: "Step-by-step assistance from application to approval with dedicated counselor support",
+    title: "Student Visa Application Support",
+    description: "Personalized assistance from start to finish, ensuring smooth progress from application to approval.",
+  },
+  {
+    icon: CalendarDays, CalendarPlus, Clock,
+    title: "Visa Slot Booking",
+    description: " Your file submission appointment will be booked at the appropriate VFS center.",
   },
   {
     icon: FileCheck,
@@ -18,20 +25,16 @@ const services = [
     title: "Pre-Departure Support",
     description: "Accommodation assistance, travel planning, and essential documentation guidance",
   },
-  {
-    icon: BookOpen,
-    title: "University Guidance",
-    description: "Expert advice on selecting the right university and course for your career goals",
-  },
+  
   {
     icon: Users,
-    title: "Interview Preparation",
-    description: "Mock interviews and comprehensive preparation for visa interviews",
+    title: "Visa Interview",
+    description: " Easy mock interviews and simple guidance to help you feel confident for your visa interview.",
   },
   {
     icon: HeadphonesIcon,
     title: "24/7 Customer Support",
-    description: "Round-the-clock assistance for all your queries and concerns",
+    description: "We’re here anytime to help with your questions and concerns.",
   },
 ];
 

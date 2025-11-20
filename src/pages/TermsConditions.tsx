@@ -117,8 +117,7 @@ const TermsConditions = () => {
                   <div className="bg-red-50 rounded-lg p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">Important Note:</h3>
                     <p className="text-gray-700">
-                      Global Minds India is not responsible for rejections or delays caused by incomplete, 
-                      false, or misleading information provided by the user.
+                      Global Minds India is not responsible for delays or rejections caused by not following our instructions or making changes that affect your application. Please follow our guidance for a smooth and successful visa stamping.
                     </p>
                   </div>
                 </div>

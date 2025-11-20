@@ -642,7 +642,12 @@ const Apply = () => {
 
       toast.success("Visa Application Completed!");
       setLoading(false);
-      navigate("/success");
+      navigate("/success", {
+        state: {
+          name: `${firstName} ${lastName}`,
+          email,
+        },
+      });
     } catch (error: any) {
       console.error(
         error?.response?.data?.message ||

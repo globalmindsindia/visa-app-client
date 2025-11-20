@@ -1,31 +1,27 @@
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { motion } from "framer-motion";
 
 const comparisons = [
   {
     feature: "Real-time Support",
-    we: "Dedicated counselor assigned",
-    others: "Automated responses only",
+    we: "A dedicated counselor who stays connected with you throughout your journey. ",
   },
   {
     feature: "Transparent Pricing",
-    we: "No hidden charges",
-    others: "Surprise fees later",
+    we: "Clear, upfront pricing with absolutely no hidden charges. ",
   },
   {
     feature: "Fast Processing",
-    we: "Priority support & tracking",
-    others: "Standard delays",
+    we: " Priority handling, quick turnaround, and real-time tracking of your application. ",
   },
   {
     feature: "Success Rate",
-    we: "98% visa approval rate",
-    others: "No guarantee provided",
+    we: " A strong 98% visa approval rate backed by expert guidance and consistent support. ",
   },
   {
     feature: "Document Review",
-    we: "Multiple expert reviews",
-    others: "Single automated check",
+    we: "Thorough multi-level document checks by experienced professionals to ensure accuracy and completeness.",
+    
   },
 ];
 
@@ -56,31 +52,26 @@ const WhyChooseUs = () => {
           className="max-w-5xl mx-auto"
         >
           <div className="bg-card rounded-2xl shadow-2xl overflow-hidden border">
-            <div className="grid grid-cols-1 md:grid-cols-3 bg-primary text-primary-foreground p-3 sm:p-4">
-              <div className="font-heading font-semibold text-base sm:text-lg mb-2 md:mb-0">Feature</div>
-              <div className="font-heading font-semibold text-base sm:text-lg mb-2 md:mb-0">We Offer</div>
-              <div className="font-heading font-semibold text-base sm:text-lg">Others Provide</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 bg-primary text-primary-foreground p-4 sm:p-6 rounded-t-2xl">
+              <div className="font-heading font-bold text-lg sm:text-xl text-center flex items-center justify-center">Feature</div>
+              <div className="font-heading font-bold text-lg sm:text-xl text-center flex items-center justify-center">We Offer</div>
             </div>
 
             {comparisons.map((item, index) => (
-              <motion.div 
+              <motion.div
                 key={index}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-6 border-b last:border-b-0 hover:bg-muted/50 transition-colors"
+                className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 p-4 sm:p-6 border-b last:border-b-0 hover:bg-muted/50 transition-colors"
               >
-                <div className="font-body font-semibold text-foreground">
+                <div className="font-body font-semibold text-foreground text-center flex items-center justify-center">
                   {item.feature}
                 </div>
-                <div className="flex items-center gap-2 text-primary">
-                  <Check className="h-5 w-5 flex-shrink-0" />
-                  <span className="font-body">{item.we}</span>
-                </div>
-                <div className="flex items-center gap-2 text-destructive">
-                  <X className="h-5 w-5 flex-shrink-0" />
-                  <span className="font-body text-muted-foreground">{item.others}</span>
+                <div className="flex items-start gap-3 text-primary">
+                  <Check className="h-6 w-6 mt-1 flex-shrink-0" />
+                  <span className="font-body text-left leading-relaxed">{item.we}</span>
                 </div>
               </motion.div>
             ))}
@@ -95,9 +86,9 @@ const WhyChooseUs = () => {
           className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-10 md:mt-12"
         >
           {[
-            { value: "10K+", label: "Happy Students" },
+            { value: "500+", label: "Happy Students" },
             { value: "15+", label: "Countries" },
-            { value: "98%", label: "Success Rate" },
+            { value: "99%", label: "Success Rate" },
             { value: "5+", label: "Years Experience" }
           ].map((stat, index) => (
             <motion.div

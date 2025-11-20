@@ -4,40 +4,81 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const faqs = [
   {
-    question: "What is the typical visa processing time?",
-    answer: "Processing times vary by country, ranging from 2-12 weeks. Canada typically takes 8-12 weeks, USA 2-8 weeks, UK 3 weeks, and Australia 4-6 weeks. We provide priority support to expedite the process wherever possible."
+    question: "Why is a visa important to travel abroad?",
+    answer: "A visa is an official permission from a country that allows you to enter, stay, or study there legally."
   },
   {
-    question: "Is an admission letter required before applying for a visa?",
-    answer: "Yes, most countries require a valid admission or acceptance letter from a recognized educational institution. This is a mandatory document for student visa applications across all major study destinations."
+    question: "What are the basic requirements for a visa application?",
+    answer: "A valid passport, photos, financial proof, admission letter (for students), and completed application forms."
   },
   {
-    question: "What happens if my visa application is refused?",
-    answer: "In case of refusal, we provide detailed analysis of the rejection reasons and assist with reapplication. We also help identify areas of improvement and strengthen your application for better chances of approval."
+    question: "How early should I apply for my study visa?",
+    answer: "It’s best to apply 2–3 months before your travel date to avoid delays."
   },
   {
-    question: "What is your payment refund policy?",
-    answer: "We offer a partial refund if your visa is refused due to errors on our part. However, visa fees paid to embassies are non-refundable. Our transparent pricing ensures no hidden charges throughout the process."
+    question: "Do I need financial proof for a study visa?",
+    answer: "Yes, you must show you can afford tuition fees, living expenses, and travel costs."
   },
   {
-    question: "Do you provide support after visa approval?",
-    answer: "Yes! We offer comprehensive pre-departure support including accommodation assistance, travel planning, forex guidance, and essential documentation help to ensure a smooth transition to your study destination."
+    question: "What type of photos are required for a visa?",
+    answer: "Passport-size photos that meet the specific size and background guidelines of the destination country."
   },
   {
-    question: "How much financial proof do I need to show?",
-    answer: "Financial requirements vary by country. For example, Canada requires CAD 10,000+ per year, USA requires proof of all expenses, Germany needs €11,208 in a blocked account, and UK requires tuition plus £1,334/month for 9 months."
+    question: "Why is health insurance required for a visa?",
+    answer: "Many countries want students to have medical coverage in case of emergencies."
+  },
+  {
+    question: "Do all countries need biometric verification?",
+    answer: "Most countries ask for fingerprints and a photo to verify your identity."
+  },
+  {
+    question: "Why do visa applications get rejected?",
+    answer: "Common reasons include incomplete documents, insufficient funds, wrong information, or failure to meet requirements."
+  },
+  {
+    question: "What is a visa interview and why is it needed?",
+    answer: "A visa interview helps officers confirm your genuine intention to study and your financial stability."
+  },
+  {
+    question: "Why is a Statement of Purpose (SOP/LOM) required for a study visa?",
+    answer: "It explains your academic background, reasons for studying abroad, and future goals."
+  },
+  {
+    question: "How important is English proficiency for a visa?",
+    answer: "Many countries require IELTS/PTE/TOEFL scores to ensure you can handle academic coursework."
+  },
+  {
+    question: "Do I need to pay a visa fee?",
+    answer: "Yes, every country charges a non-refundable fee for processing your application."
+  },
+  {
+    question: "What happens after my visa gets approved?",
+    answer: "You receive your visa stamp/letter and can book your travel and prepare for departure."
+  },
+  {
+    question: "Can I track my visa application status?",
+    answer: "Yes, almost all visa applications can be tracked online through official portals."
+  },
+  {
+    question: "What should I do if my visa gets delayed?",
+    answer: "Stay calm, keep checking updates, and contact the embassy or VFS center if needed. Sometimes delays are routine."
   }
 ];
 
 const FAQ = () => {
+  const [showAll, setShowAll] = useState(false);
+  const displayedFaqs = showAll ? faqs : faqs.slice(0, 5);
+
   return (
     <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -54,7 +95,7 @@ const FAQ = () => {
 
         <div className="max-w-3xl mx-auto">
           <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
+            {displayedFaqs.map((faq, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -62,7 +103,7 @@ const FAQ = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <AccordionItem 
+                <AccordionItem
                   value={`item-${index}`}
                   className="bg-card border-2 rounded-lg px-4 sm:px-6 hover:border-primary/50 transition-colors"
                 >
@@ -76,6 +117,15 @@ const FAQ = () => {
               </motion.div>
             ))}
           </Accordion>
+          <div className="text-center mt-8">
+            <Button
+              onClick={() => setShowAll(!showAll)}
+              variant="outline"
+              className="font-heading font-semibold"
+            >
+              {showAll ? "View Less" : "View More"}
+            </Button>
+          </div>
         </div>
       </div>
     </section>

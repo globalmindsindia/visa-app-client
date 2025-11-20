@@ -89,8 +89,7 @@ const Countries = () => {
             <span className="text-primary block mt-2">Dream Destination</span>
           </h2>
           <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
-            Select your destination country to view detailed visa requirements
-            and processing information
+            Select a country to explore its visa requirements and processing information
           </p>
         </motion.div>
 

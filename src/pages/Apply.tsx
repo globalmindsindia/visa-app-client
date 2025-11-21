@@ -795,7 +795,7 @@ const Apply = () => {
 
                 <div className="text-center">
                   <h1 className="font-heading font-bold text-3xl sm:text-4xl text-foreground mb-2">
-                    Visa Application Form
+                    Visa Documentation Form
                   </h1>
                   <p className="font-body text-muted-foreground">
                     Step {step} of {totalSteps}
@@ -833,7 +833,7 @@ const Apply = () => {
                             animate={{ scale: 1 }}
                             transition={{ type: "spring", stiffness: 200 }}
                           >
-                            Academic Details
+                            Admission Details
                           </motion.span>
                         )}
                         {step === 3 && (

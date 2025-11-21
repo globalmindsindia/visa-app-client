@@ -72,7 +72,7 @@ const TermsConditions = () => {
               <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  Welcome to Global Minds India ("we," "us," or "our"). By using our visa application assistance services, 
+                  Welcome to Global Minds India. By using our visa application assistance services, 
                   you agree to these Terms and Conditions. Please review them carefully before proceeding.
                 </p>
               </div>

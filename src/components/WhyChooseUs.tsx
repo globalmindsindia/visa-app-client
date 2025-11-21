@@ -21,15 +21,17 @@ const comparisons = [
   {
     feature: "Document Review",
     we: "Thorough multi-level document checks by experienced professionals to ensure accuracy and completeness.",
-    
   },
 ];
 
 const WhyChooseUs = () => {
   return (
-    <section id="why-us" className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))]">
+    <section
+      id="why-us"
+      className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))]"
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -44,7 +46,7 @@ const WhyChooseUs = () => {
           </p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
@@ -53,8 +55,12 @@ const WhyChooseUs = () => {
         >
           <div className="bg-card rounded-2xl shadow-2xl overflow-hidden border">
             <div className="grid grid-cols-1 md:grid-cols-2 bg-primary text-primary-foreground p-4 sm:p-6 rounded-t-2xl">
-              <div className="font-heading font-bold text-lg sm:text-xl text-center flex items-center justify-center">Feature</div>
-              <div className="font-heading font-bold text-lg sm:text-xl text-center flex items-center justify-center">We Offer</div>
+              <div className="font-heading font-bold text-lg sm:text-xl text-center flex items-center justify-center">
+                Feature
+              </div>
+              <div className="font-heading font-bold text-lg sm:text-xl text-center flex items-center justify-center">
+                We Offer
+              </div>
             </div>
 
             {comparisons.map((item, index) => (
@@ -71,14 +77,16 @@ const WhyChooseUs = () => {
                 </div>
                 <div className="flex items-start gap-3 text-primary">
                   <Check className="h-6 w-6 mt-1 flex-shrink-0" />
-                  <span className="font-body text-left leading-relaxed">{item.we}</span>
+                  <span className="font-body text-left leading-relaxed">
+                    {item.we}
+                  </span>
                 </div>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -89,7 +97,7 @@ const WhyChooseUs = () => {
             { value: "500+", label: "Happy Students" },
             { value: "15+", label: "Countries" },
             { value: "99%", label: "Success Rate" },
-            { value: "5+", label: "Years Experience" }
+            { value: "5+", label: "Years Experience" },
           ].map((stat, index) => (
             <motion.div
               key={index}
@@ -100,7 +108,9 @@ const WhyChooseUs = () => {
               whileHover={{ scale: 1.05 }}
               className="text-center bg-card p-4 sm:p-6 rounded-xl shadow-lg min-w-[120px] sm:min-w-[150px]"
             >
-              <div className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl text-accent mb-2">{stat.value}</div>
+              <div className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl text-[hsl(210,75%,35%)] mb-2">
+                {stat.value}
+              </div>
               <div className="font-body text-muted-foreground">{stat.label}</div>
             </motion.div>
           ))}

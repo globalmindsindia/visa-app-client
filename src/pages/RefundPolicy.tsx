@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { RefreshCw, CheckCircle, XCircle, AlertTriangle, Phone, Mail, DollarSign } from "lucide-react";
+import { RefreshCw, CheckCircle,IndianRupee, XCircle, AlertTriangle, Phone, Mail, } from "lucide-react";
 import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -122,7 +122,7 @@ const RefundPolicy = () => {
                 <p className="text-gray-700 mb-4">Refunds may be considered in the following cases:</p>
                 <div className="grid md:grid-cols-3 gap-4 mb-6">
                   <div className="bg-yellow-50 rounded-lg p-4 text-center">
-                    <DollarSign className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                    <IndianRupee className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
                     <h4 className="font-semibold text-gray-900 mb-2">Duplicate Payment</h4>
                     <p className="text-sm text-gray-600">Accidental or duplicate payment</p>
                   </div>
@@ -159,7 +159,7 @@ const RefundPolicy = () => {
                     <span className="text-gray-700">Holding the service for a future intake</span>
                   </div>
                   <div className="bg-purple-50 rounded-lg p-4 flex items-center">
-                    <DollarSign className="w-5 h-5 text-purple-600 mr-3 flex-shrink-0" />
+                    <IndianRupee className="w-5 h-5 text-purple-600 mr-3 flex-shrink-0" />
                     <span className="text-gray-700">Converting payment towards another advisory service (e.g., counseling, SOP review)</span>
                   </div>
                 </div>

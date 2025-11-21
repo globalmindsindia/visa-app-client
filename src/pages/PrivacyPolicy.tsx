@@ -76,7 +76,7 @@ const PrivacyPolicy = () => {
                   1. Introduction
                 </h2>
                 <p className="text-gray-700 leading-relaxed">
-                  Global Minds India ("we", "our", "us") is committed to safeguarding your personal information and ensuring privacy in all visa application and study abroad services. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our visa assistance platform.
+                  Global Minds India  is committed to safeguarding your personal information and ensuring privacy in all visa application and study abroad services. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our visa assistance platform.
                 </p>
               </div>
             </motion.section>

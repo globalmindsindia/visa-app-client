@@ -575,7 +575,8 @@ const Apply = () => {
     paymentId: string,
     amount: number
   ) => {
-    setLoading(true); // <-- SHOW LOADER
+    setLoading(true);
+
     const { firstName, lastName, email, phoneNumber } = personalInfo;
 
     try {
@@ -592,7 +593,6 @@ const Apply = () => {
         });
       } catch (err: any) {
         const msg = err?.response?.data?.message || "";
-
         if (msg.includes("User already exists")) {
           console.warn("APS user already exists ✔");
         } else {
@@ -601,7 +601,7 @@ const Apply = () => {
       }
 
       // =====================================================
-      // 2. SEND ZOHO INVITE
+      // 2. SEND ZOHO INVITE WITH TAG
       // =====================================================
       try {
         const zohoResponse = await visaService.storeInZoho({
@@ -611,7 +611,8 @@ const Apply = () => {
             Email: email,
             Phone: phoneNumber,
           },
-          userTypeId: "6689208000001267117", // VISA type in Zoho
+          userTypeId: "6689208000001267117",
+          tag: "visa", // 👈 IMPORTANT
         });
 
         if (
@@ -622,7 +623,6 @@ const Apply = () => {
         }
       } catch (err: any) {
         const errMsg = err?.response?.data?.error || "";
-
         if (errMsg.includes("DUPLICATE_DATA")) {
           console.warn("Zoho duplicate detected ✔");
         } else {
@@ -642,6 +642,7 @@ const Apply = () => {
 
       toast.success("Visa Application Completed!");
       setLoading(false);
+
       navigate("/success", {
         state: {
           name: `${firstName} ${lastName}`,
@@ -654,7 +655,7 @@ const Apply = () => {
           "We could not complete your registration. Please contact support."
       );
     } finally {
-      setLoading(false); // make sure loader is cleared
+      setLoading(false);
     }
   };
 

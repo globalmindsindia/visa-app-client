@@ -15,8 +15,10 @@ interface SearchableSelectProps {
   disabled?: boolean;
   required?: boolean;
 
-  /** NEW: allow create option always for country */
-  isCountry?: boolean;
+  /** NEW — lazy load + searching */
+  onLoadMore?: () => void;
+  onSearchChange?: (query: string) => void;
+  loading?: boolean;
 }
 
 const SearchableSelect = ({
@@ -28,27 +30,30 @@ const SearchableSelect = ({
   onAddNew,
   disabled = false,
   required = false,
-  isCountry = false,
+
+  // NEW
+  onLoadMore,
+  onSearchChange,
+  loading = false,
 }: SearchableSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const sortedOptions = [...options].sort((a, b) => a.localeCompare(b));
+  // 🔍 Trigger backend search
+  useEffect(() => {
+    if (onSearchChange) onSearchChange(searchTerm);
+  }, [searchTerm]);
 
-  const filteredOptions = sortedOptions.filter((option) =>
+  const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const exactMatch = sortedOptions.some(
-    (option) => option.toLowerCase() === searchTerm.toLowerCase()
-  );
-
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(e.target as Node)
       ) {
         setIsOpen(false);
         setSearchTerm("");
@@ -74,11 +79,6 @@ const SearchableSelect = ({
     }
   };
 
-  const showCreateButton =
-    onAddNew &&
-    searchTerm.trim().length > 0 &&
-    (isCountry ? true : !exactMatch);
-
   return (
     <div className="space-y-2" ref={dropdownRef}>
       <Label>
@@ -89,9 +89,7 @@ const SearchableSelect = ({
         <Button
           type="button"
           variant="outline"
-          className={`w-full justify-between ${
-            disabled ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`w-full justify-between ${disabled ? "opacity-50" : ""}`}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
         >
@@ -114,9 +112,10 @@ const SearchableSelect = ({
               transition={{ duration: 0.2 }}
               className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-hidden"
             >
+              {/* Search Box */}
               <div className="p-2 border-b">
                 <div className="relative">
-                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search..."
                     value={searchTerm}
@@ -127,36 +126,45 @@ const SearchableSelect = ({
                 </div>
               </div>
 
-              <div className="max-h-40 overflow-y-auto">
-                {filteredOptions.length > 0 ? (
-                  filteredOptions.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      className="w-full text-left px-3 py-2 hover:bg-muted transition-colors text-sm"
-                      onClick={() => handleSelect(option)}
-                    >
-                      {option}
-                    </button>
-                  ))
-                ) : searchTerm ? (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
-                    No results found
-                  </div>
-                ) : (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
-                    Start typing to search...
+              {/* Scrollable List */}
+              <div
+                className="max-h-40 overflow-y-auto"
+                onScroll={(e) => {
+                  const target = e.currentTarget;
+                  if (
+                    target.scrollTop + target.clientHeight >=
+                    target.scrollHeight - 20
+                  ) {
+                    onLoadMore?.(); // 🔥 Lazy load next batch
+                  }
+                }}
+              >
+                {filteredOptions.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className="w-full text-left px-3 py-2 hover:bg-muted text-sm"
+                    onClick={() => handleSelect(option)}
+                  >
+                    {option}
+                  </button>
+                ))}
+
+                {loading && (
+                  <div className="px-3 py-2 text-center text-sm text-gray-400">
+                    Loading more...
                   </div>
                 )}
               </div>
 
-              {showCreateButton && (
+              {/* Create new */}
+              {onAddNew && searchTerm.trim() && (
                 <div className="border-t p-2">
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-primary hover:text-primary hover:bg-primary/10"
+                    className="w-full justify-start"
                     onClick={handleAddNew}
                   >
                     <Plus className="h-4 w-4 mr-2" />

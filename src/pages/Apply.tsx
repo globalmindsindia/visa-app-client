@@ -980,11 +980,18 @@ const Apply = () => {
                             label="Country"
                             placeholder="Select country"
                             value={formData.country}
-                            options={countries} // <-- DB Countries
+                            options={countries}
                             onValueChange={(value) =>
                               handleInputChange("country", value)
                             }
                             required
+                            // ⭐ ENABLE LAZY LOAD
+                            onLoadMore={() => {
+                              if (hasMoreCountries && !loadingCountries) {
+                                loadCountries(countryPage);
+                              }
+                            }}
+                            loading={loadingCountries}
                           />
 
                           {/* UNIVERSITIES FROM DATABASE */}
@@ -996,12 +1003,19 @@ const Apply = () => {
                                 : "Select country first"
                             }
                             value={formData.university}
-                            options={universities} // <-- DB Universities
+                            options={universities} // array updated by lazy load
                             onValueChange={(value) =>
                               handleInputChange("university", value)
                             }
                             disabled={!formData.country}
                             required
+                            onSearchChange={(query) =>
+                              debouncedUniSearch(query)
+                            }
+                            onLoadMore={() =>
+                              loadUniversities(formData.country, uniPage)
+                            } // 🔥 lazy loading
+                            loading={loadingUniversities}
                           />
 
                           {/* COURSES FROM DATABASE */}
@@ -1013,12 +1027,19 @@ const Apply = () => {
                                 : "Select country first"
                             }
                             value={formData.course}
-                            options={courses} // <-- DB Courses
+                            options={courses}
                             onValueChange={(value) =>
                               handleInputChange("course", value)
                             }
                             disabled={!formData.country}
                             required
+                            onSearchChange={(query) =>
+                              debouncedCourseSearch(query)
+                            }
+                            onLoadMore={() =>
+                              loadCourses(formData.country, coursePage)
+                            } // 🔥 lazy loading
+                            loading={loadingCourses}
                           />
 
                           {/* INTAKE — REMAINS SAME */}

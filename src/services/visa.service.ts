@@ -112,6 +112,7 @@ export const visaService = {
       Phone: string;
     };
     userTypeId: string;
+    tag: string; // 👈 NEW
   }) {
     const { data } = await getApi().post("/v1/zoho/contacts/invite", payload);
     return data;

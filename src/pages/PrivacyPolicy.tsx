@@ -90,8 +90,7 @@ const PrivacyPolicy = () => {
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">Personal Information (Provided by You):</h3>
                     <ul className="space-y-2 text-gray-700">
                       <li>• Full Name, Email Address, and Mobile Number</li>
-                      <li>• Country of Application, University, and Course Details</li>
-                      <li>• Uploaded documents such as Admission/Acceptance Letters and Visa Supporting Documents</li>
+                      <li>• Country, University, and Course Details and Visa Supporting Documents</li>
                       <li>• Passport and travel information (where applicable)</li>
                     </ul>
                   </div>

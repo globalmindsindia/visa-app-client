@@ -80,17 +80,21 @@ const RefundPolicy = () => {
                   <div className="space-y-3">
                     <div className="flex items-center">
                       <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
-                      <span className="text-gray-700">The cancellation request is made within 7 days of payment, and</span>
+                      <span className="text-gray-700">The cancellation request is made within 3 days of payment, and</span>
                     </div>
                     <div className="flex items-center">
                       <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
                       <span className="text-gray-700">The visa service or communication process has not yet started</span>
                     </div>
+                    <div className="flex items-center">
+                      <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
+                      <span className="text-gray-700">In case of a visa rejection or processing failure, the full visa processing charges will be refunded.</span>
+                    </div>
                   </div>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-4">
                   <p className="text-blue-800 font-medium">
-                    Refunds will be processed within 30 working days after approval.
+                    Refunds will be processed within 10 working days after approval.
                   </p>
                 </div>
               </div>

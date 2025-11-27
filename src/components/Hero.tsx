@@ -24,7 +24,7 @@ const Hero = () => {
               className="inline-flex items-center gap-2 bg-card px-4 py-2 rounded-full text-sm font-medium border shadow-sm"
             >
               <CheckCircle className="h-4 w-4 text-primary" />
-              <span>Trusted by Students</span>
+              <span>Trusted by All</span>
             </motion.div>
             
             <motion.h1 

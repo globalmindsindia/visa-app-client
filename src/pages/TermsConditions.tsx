@@ -72,8 +72,7 @@ const TermsConditions = () => {
               <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  Welcome to Global Minds India. By using our visa application assistance services, 
-                  you agree to these Terms and Conditions. Please review them carefully before proceeding.
+                  Welcome to Global Minds India. By using our visa application support services, you agree to our Terms and Conditions. Please read them carefully before continuing.
                 </p>
               </div>
             </motion.section>
@@ -87,16 +86,15 @@ const TermsConditions = () => {
                 <div className="bg-blue-50 rounded-lg p-6 mb-4">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Our services include:</h3>
                   <ul className="space-y-2 text-gray-700">
-                    <li>• Visa application assistance and documentation guidance</li>
-                    <li>• Country-specific checklist communication and follow-up</li>
-                    <li>• Counseling and advisory support related to visa documentation</li>
-                    <li>• Payment collection for consultancy and processing support</li>
+                    <li>• Providing visa application support and documentation guidance</li>
+                    <li>• Sharing country-specific checklists and conducting follow-ups</li>
+                    <li>• Offering counseling and advisory support related to visa documentation</li>
+                    <li>• Collecting payments for consultancy and processing support</li>
                   </ul>
                 </div>
                 <div className="bg-yellow-50 rounded-lg p-4">
                   <p className="text-gray-700 font-medium">
-                    We do not represent or act on behalf of any embassy, government, or immigration authority. 
-                    Our role is strictly limited to consultation, document guidance, and administrative support.
+                    We do not represent, endorse, or act on behalf of any embassy, government body, or immigration authority. Our role is strictly limited to consultation, documentation guidance, and administrative support.
                   </p>
                 </div>
               </div>

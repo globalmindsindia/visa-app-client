@@ -128,7 +128,7 @@ const CountryRequirements = () => {
         <Header />
 
         <main className="flex-grow py-12">
-          <div className="container mx-auto px-2 sm:px-6 lg:px-8 max-w-5xl">
+          <div className="container mx-auto px-2 sm:px-6 lg:px-8 max-w-7xl">
             {/* Title */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -150,186 +150,141 @@ const CountryRequirements = () => {
               </div>
             </motion.div>
 
-            <div className="flex flex-col md:flex-row gap-6">
-              {/* Left: Stepper in Card */}
-              <div className="w-full md:w-1/3 order-1">
-                <div className="relative h-full">
-                  <div className="rounded-2xl shadow-xl border-2 border-blue-200/60 bg-white/70 backdrop-blur-md h-full flex flex-col justify-start px-2 py-6">
-                    <div className="absolute left-0 top-9 bottom-9 w-2 rounded-full bg-gradient-to-b from-blue-400/70 via-cyan-400/30 to-sky-200/30" />
-                    <div className="flex flex-col gap-4 relative z-10">
-                      <div className="relative flex flex-col gap-4 w-full">
-                        <div className="hidden md:block absolute left-6 top-7 bottom-7 w-1 pointer-events-none z-0">
-                          <motion.div
-                            className="w-full h-full rounded bg-gradient-to-b from-blue-200 to-sky-300"
-                            layoutId="checklist-bar"
-                          />
-                        </div>
-                        {requirements.map((cat: any, idx: number) => {
-                          const gradient = gradients[idx % gradients.length];
-                          return (
-                            <motion.button
-                              layout
-                              key={cat._id}
-                              onClick={() => {
-                                setSelectedCategory(idx);
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
-                              className={`group relative z-10 flex items-center md:items-start gap-4 md:gap-2 mb-4 md:mb-0 md:px-0 px-1 focus:outline-none transition-all`}
-                              whileHover={{ scale: selectedCategory === idx ? 1.06 : 1.03 }}
-                              whileTap={{ scale: 0.98 }}
-                              aria-current={selectedCategory === idx ? "step" : undefined}
-                            >
-                              <div className="relative flex-shrink-0">
-                                <motion.div
-                                  className={`w-12 h-12 flex items-center justify-center rounded-full shadow-md border-4 border-white transition-all
-                                    ${selectedCategory === idx
-                                      ? `bg-gradient-to-br ${gradient} shadow-xl`
-                                      : "bg-white"
-                                    }
-                                  `}
-                                  animate={{
-                                    boxShadow:
-                                      selectedCategory === idx
-                                        ? "0 4px 18px 0 rgba(56,189,248,0.15)"
-                                        : "0 1px 3px 0 rgba(0,0,0,0.06)"
-                                  }}
-                                  transition={{ type: "spring", stiffness: 120, damping: 11 }}
-                                >
-                                  <span className={`text-slate-600 ${selectedCategory === idx ? "text-white" : "text-blue-500"}`}>
-                                    {stepIcons[idx] || <FileText className="w-5 h-5" />}
-                                  </span>
-                                </motion.div>
-                                {idx !== requirements.length - 1 && (
-                                  <span className="hidden md:block absolute top-full left-1/2 -translate-x-1/2 w-1 h-7 bg-gradient-to-b from-blue-100 to-blue-300 rounded-xl z-[-1]" />
-                                )}
-                              </div>
-                              {/* Title */}
-                              <div className={`px-2 py-2 transition-all rounded-xl group-hover:bg-blue-50
-                                ${selectedCategory === idx
-                                  ? `bg-white shadow-md border-l-4 border-blue-400 font-semibold text-blue-800`
-                                  : "text-slate-700"
-                                }
-                              `}>
-                                <div className="truncate text-sm md:text-base">{cat.category}</div>
-                              </div>
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
+            {/* Main Container with Header Navigation */}
+            <div className="rounded-2xl shadow-xl border-2 border-blue-200/60 bg-white/80 backdrop-blur-md overflow-hidden">
+              {/* Header Navigation */}
+              <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50 p-4">
+                <div className="hidden md:flex gap-2 justify-center">
+                  {requirements.map((cat: any, idx: number) => {
+                    const gradient = gradients[idx % gradients.length];
+                    return (
+                      <motion.button
+                        key={cat._id}
+                        onClick={() => setSelectedCategory(idx)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all font-medium text-sm flex-1 justify-center
+                          ${selectedCategory === idx
+                            ? `bg-gradient-to-r ${gradient} text-white shadow-md`
+                            : "bg-white text-slate-700 hover:bg-blue-50 border border-blue-100"
+                          }
+                        `}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <span className={selectedCategory === idx ? "text-white" : "text-blue-500"}>
+                          {stepIcons[idx] || <FileText className="w-4 h-4" />}
+                        </span>
+                        <span>{cat.category}</span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+                {/* Mobile View */}
+                <div className="md:hidden flex gap-1 overflow-x-auto scrollbar-hide">
+                  {requirements.map((cat: any, idx: number) => {
+                    const gradient = gradients[idx % gradients.length];
+                    return (
+                      <motion.button
+                        key={cat._id}
+                        onClick={() => setSelectedCategory(idx)}
+                        className={`flex items-center gap-1 px-2 py-2 rounded-lg transition-all font-medium text-xs whitespace-nowrap flex-shrink-0
+                          ${selectedCategory === idx
+                            ? `bg-gradient-to-r ${gradient} text-white shadow-md`
+                            : "bg-white text-slate-700 hover:bg-blue-50 border border-blue-100"
+                          }
+                        `}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <span className={selectedCategory === idx ? "text-white" : "text-blue-500"}>
+                          {stepIcons[idx] || <FileText className="w-3 h-3" />}
+                        </span>
+                        <span>{cat.category}</span>
+                      </motion.button>
+                    );
+                  })}
                 </div>
               </div>
-              {/* Right: Animated Content */}
-              <div className="w-full md:w-2/3 min-h-[300px] order-2">
+
+              {/* Content Area */}
+              <div className="p-6">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={selectedCategory}
-                    initial={{ opacity: 0, x: 40, scale: 0.96 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: -40, scale: 0.96 }}
-                    transition={{ duration: 0.36, type: "spring" }}
-                    className="h-full"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <div className={`relative rounded-2xl shadow-xl bg-white/80 backdrop-blur-md border-2 p-1 overflow-hidden border-blue-200 h-full`}>
-                      <div
-                        className={`absolute inset-x-0 top-0 h-2 rounded-t-2xl bg-gradient-to-r ${gradients[selectedCategory % gradients.length]} opacity-60`}
-                      />
-                      <CardHeader className="pb-2">
-                        <CardTitle className="flex items-center gap-3 text-xl font-bold text-blue-800">
-                          <span className={`w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br ${gradients[selectedCategory % gradients.length]} text-white font-bold shadow`}>
-                            {selectedCategory + 1}
-                          </span>
-                          {requirements[selectedCategory].category}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4 mt-2 pb-4">
-                        {requirements[selectedCategory].type === "costs" ? (
-                          <>
-                            {/* Costs Section */}
-                            <div className="space-y-3">
-                              {commonCosts.map((cost, idx) => (
-                                <motion.div
-                                  key={idx}
-                                  initial={{ opacity: 0, y: 15 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: idx * 0.08 }}
-                                  className="p-4 rounded-xl bg-amber-50/80 border border-amber-100 shadow hover:bg-amber-100 transition-all"
-                                >
-                                  <div className="font-semibold text-amber-900 mb-1 flex items-center gap-2">
-                                    <CreditCard className="w-4 h-4 text-amber-600" />
-                                    {cost.category}
-                                  </div>
-                                  <div className="text-sm text-slate-600">{cost.description}</div>
-                                </motion.div>
-                              ))}
-                            </div>
+                    {/* Category Title */}
+                    <div className="mb-6">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className={`w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br ${gradients[selectedCategory % gradients.length]} text-white font-bold shadow`}>
+                          {selectedCategory + 1}
+                        </span>
+                        <h2 className="text-2xl font-bold text-blue-800">{requirements[selectedCategory].category}</h2>
+                      </div>
+                      <div className={`h-1 w-20 rounded-full bg-gradient-to-r ${gradients[selectedCategory % gradients.length]}`} />
+                    </div>
 
-                            {/* Country Specific Requirements */}
-                            <div className="mt-6 pt-6 border-t border-slate-200">
-                              <h5 className="font-semibold text-lg text-blue-900 mb-3">
-                                {country.name} Specific Requirements
-                              </h5>
+                    {/* Content */}
+                    <div className="space-y-4">
+                      {requirements[selectedCategory].type === "costs" ? (
+                        <>
+                          {/* Costs Section */}
+                          <div className="grid gap-4 md:grid-cols-2">
+                            {commonCosts.map((cost, idx) => (
                               <motion.div
+                                key={idx}
                                 initial={{ opacity: 0, y: 15 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="p-4 rounded-xl bg-blue-50/80 border border-blue-100 shadow"
+                                transition={{ delay: idx * 0.08 }}
+                                className="p-4 rounded-xl bg-amber-50/80 border border-amber-100 shadow hover:bg-amber-100 transition-all"
                               >
-                                <div className="font-semibold text-blue-900 mb-1 flex items-center gap-2">
-                                  <Globe className="w-4 h-4 text-blue-600" />
-                                  Financial Proof Required
+                                <div className="font-semibold text-amber-900 mb-1 flex items-center gap-2">
+                                  <CreditCard className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                                  <span className="break-words">{cost.category}</span>
                                 </div>
-                                <div className="text-sm text-slate-600">
-                                  {requirements[selectedCategory].countrySpecific.financialRequirement}
-                                </div>
-                              </motion.div>
-                              <motion.div
-                                initial={{ opacity: 0, y: 15 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="p-4 rounded-xl bg-blue-50/80 border border-blue-100 shadow mt-3"
-                              >
-                                <div className="font-semibold text-blue-900 mb-1 flex items-center gap-2">
-                                  <Heart className="w-4 h-4 text-blue-600" />
-                                  Health Insurance Estimate
-                                </div>
-                                <div className="text-sm text-slate-600">
-                                  {requirements[selectedCategory].countrySpecific.insuranceEstimate}
-                                </div>
-                              </motion.div>
-                            </div>
-
-                            {/* Disclaimer */}
-                            <div className="mt-6 p-3 rounded-xl bg-red-50/80 border border-red-100 flex gap-2">
-                              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                              <div className="text-xs text-red-700">
-                                <p className="font-semibold mb-1">Disclaimer:</p>
-                                <p>Fees & document rules can change; final decision lies with the visa authority.</p>
-                              </div>
-                            </div>
-                          </>
-                        ) : (
-                          /* Documents Section */
-                          <>
-                            {requirements[selectedCategory].documents.map((doc: any, docIdx: number) => (
-                              <motion.div
-                                key={doc._id || docIdx}
-                                initial={{ opacity: 0, y: 15 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: docIdx * 0.08 }}
-                                className="p-5 rounded-xl bg-blue-50/80 border border-blue-100 shadow group hover:bg-blue-100 transition-all"
-                              >
-                                <div className="font-semibold text-blue-900 mb-1 flex items-center gap-2">
-                                  <FileText className="w-4 h-4 text-blue-400" />
-                                  {doc.name}
-                                </div>
-                                <div className="text-sm text-slate-600">{doc.details}</div>
+                                <div className="text-sm text-slate-600 break-words">{cost.description}</div>
                               </motion.div>
                             ))}
-                          </>
-                        )}
-                      </CardContent>
+                            
+                            {/* Disclaimer Card - appears after GMI Service Fee */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 15 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: commonCosts.length * 0.08 }}
+                              className="p-4 rounded-xl bg-red-50/80 border border-red-100 shadow"
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                                <span className="font-semibold text-red-900">Disclaimer</span>
+                              </div>
+                              <div className="text-sm text-red-700">
+                                Fees & document rules can change; final decision lies with the visa authority.
+                              </div>
+                            </motion.div>
+                          </div>
+                        </>
+                      ) : (
+                        /* Documents Section */
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                          {requirements[selectedCategory].documents.map((doc: any, docIdx: number) => (
+                            <motion.div
+                              key={doc._id || docIdx}
+                              initial={{ opacity: 0, y: 15 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: docIdx * 0.08 }}
+                              className="p-4 rounded-xl bg-blue-50/80 border border-blue-100 shadow group hover:bg-blue-100 transition-all"
+                            >
+                              <div className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                                <span className="break-words">{doc.name}</span>
+                              </div>
+                              <div className="text-sm text-slate-600 break-words">{doc.details}</div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 </AnimatePresence>

@@ -68,16 +68,20 @@ const faqs = [
   {
     question: "What should I do if my visa gets delayed?",
     answer: "Stay calm, keep checking updates, and contact the embassy or VFS center if needed. Sometimes delays are routine."
+  },
+  {
+  question: "Can I work while studying abroad on a student visa?",
+  answer: "Yes, most countries allow international students to work part-time during studies and full-time during scheduled breaks, subject to visa rules."
   }
 ];
 
 const FAQ = () => {
   const [showAll, setShowAll] = useState(false);
-  const displayedFaqs = showAll ? faqs : faqs.slice(0, 5);
+  const displayedFaqs = showAll ? faqs : faqs.slice(0, 10);
 
   return (
     <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))]">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container-app">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -93,31 +97,58 @@ const FAQ = () => {
           </p>
         </motion.div>
 
-        <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="space-y-4">
-            {displayedFaqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <AccordionItem
-                  value={`item-${index}`}
-                  className="bg-card border-2 rounded-lg px-4 sm:px-6 hover:border-primary/50 transition-colors"
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <Accordion type="single" collapsible className="space-y-4">
+              {displayedFaqs.slice(0, Math.ceil(displayedFaqs.length / 2)).map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
                 >
-                <AccordionTrigger className="font-heading font-semibold text-left hover:text-primary">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="font-body text-muted-foreground">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-              </motion.div>
-            ))}
-          </Accordion>
-          <div className="text-center mt-8">
+                  <AccordionItem
+                    value={`item-${index}`}
+                    className="bg-card border-2 rounded-lg px-4 sm:px-6 hover:border-primary/50 transition-colors"
+                  >
+                  <AccordionTrigger className="font-heading font-semibold text-left hover:text-primary">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="font-body text-muted-foreground">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+                </motion.div>
+              ))}
+            </Accordion>
+          </div>
+          <div>
+            <Accordion type="single" collapsible className="space-y-4">
+              {displayedFaqs.slice(Math.ceil(displayedFaqs.length / 2)).map((faq, index) => (
+                <motion.div
+                  key={index + Math.ceil(displayedFaqs.length / 2)}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                >
+                  <AccordionItem
+                    value={`item-${index + Math.ceil(displayedFaqs.length / 2)}`}
+                    className="bg-card border-2 rounded-lg px-4 sm:px-6 hover:border-primary/50 transition-colors"
+                  >
+                  <AccordionTrigger className="font-heading font-semibold text-left hover:text-primary">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="font-body text-muted-foreground">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+                </motion.div>
+              ))}
+            </Accordion>
+          </div>
+          <div className="text-center mt-8 md:col-span-2">
             <Button
               onClick={() => setShowAll(!showAll)}
               variant="outline"

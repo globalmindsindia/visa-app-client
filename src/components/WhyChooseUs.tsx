@@ -30,7 +30,7 @@ const WhyChooseUs = () => {
       id="why-us"
       className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))]"
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container-app">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -51,7 +51,6 @@ const WhyChooseUs = () => {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="max-w-5xl mx-auto"
         >
           <div className="bg-card rounded-2xl shadow-2xl overflow-hidden border">
             <div className="grid grid-cols-1 md:grid-cols-2 bg-primary text-primary-foreground p-4 sm:p-6 rounded-t-2xl">
@@ -91,7 +90,7 @@ const WhyChooseUs = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-10 md:mt-12"
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-8 sm:mt-10 md:mt-12"
         >
           {[
             { value: "500+", label: "Happy Students" },
@@ -106,7 +105,7 @@ const WhyChooseUs = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
               whileHover={{ scale: 1.05 }}
-              className="text-center bg-card p-4 sm:p-6 rounded-xl shadow-lg min-w-[120px] sm:min-w-[150px]"
+              className="text-center bg-card p-4 sm:p-6 rounded-xl shadow-lg"
             >
               <div className="font-heading font-bold text-2xl sm:text-3xl md:text-4xl text-[hsl(210,75%,35%)] mb-2">
                 {stat.value}

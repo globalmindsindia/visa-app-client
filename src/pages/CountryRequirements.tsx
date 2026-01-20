@@ -12,13 +12,14 @@ import {
   Phone,
   Mail,
   MessageCircle,
+  AlertCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CountriesRequirementBackground from "@/assets/Countries_requirement_background.jpg";
-import { visaRequirementsService } from "@/services/visaRequirementsService";
+import { getCountryBySlug, getCountryRequirements, commonCosts } from "@/data/documentsData";
 
 // Step Icons (can add more if required)
 const stepIcons = [
@@ -84,16 +85,24 @@ const CountryRequirements = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    visaRequirementsService
-      .getBySlug(countrySlug!)
-      .then((res) => {
-        setCountry(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        navigate("/not-found");
-      });
-  }, [countrySlug]);
+    
+    // Get country data from local data
+    const countryData = getCountryBySlug(countrySlug!);
+    
+    if (!countryData) {
+      navigate("/not-found");
+      return;
+    }
+    
+    // Get requirements with local data
+    const requirements = getCountryRequirements(countrySlug!);
+    
+    setCountry({
+      ...countryData,
+      detailedRequirements: requirements,
+    });
+    setLoading(false);
+  }, [countrySlug, navigate]);
 
   if (loading) {
     return (
@@ -143,12 +152,12 @@ const CountryRequirements = () => {
 
             <div className="flex flex-col md:flex-row gap-6">
               {/* Left: Stepper in Card */}
-              <div className="md:w-1/3 w-full">
+              <div className="w-full md:w-1/3 order-1">
                 <div className="relative h-full">
-                  <div className="rounded-2xl shadow-xl border-2 border-blue-200/60 bg-white/70 backdrop-blur-md h-full flex flex-col justify-center px-2 py-6">
+                  <div className="rounded-2xl shadow-xl border-2 border-blue-200/60 bg-white/70 backdrop-blur-md h-full flex flex-col justify-start px-2 py-6">
                     <div className="absolute left-0 top-9 bottom-9 w-2 rounded-full bg-gradient-to-b from-blue-400/70 via-cyan-400/30 to-sky-200/30" />
-                    <div className="flex md:flex-col flex-row gap-4 md:gap-0 justify-center md:items-stretch items-center relative z-10">
-                      <div className="relative flex md:flex-col flex-row md:gap-0 gap-4 w-full">
+                    <div className="flex flex-col gap-4 relative z-10">
+                      <div className="relative flex flex-col gap-4 w-full">
                         <div className="hidden md:block absolute left-6 top-7 bottom-7 w-1 pointer-events-none z-0">
                           <motion.div
                             className="w-full h-full rounded bg-gradient-to-b from-blue-200 to-sky-300"
@@ -212,7 +221,7 @@ const CountryRequirements = () => {
                 </div>
               </div>
               {/* Right: Animated Content */}
-              <div className="md:w-2/3 w-full min-h-[300px]">
+              <div className="w-full md:w-2/3 min-h-[300px] order-2">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={selectedCategory}
@@ -235,21 +244,91 @@ const CountryRequirements = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4 mt-2 pb-4">
-                        {requirements[selectedCategory].documents.map((doc: any, docIdx: number) => (
-                          <motion.div
-                            key={doc._id || docIdx}
-                            initial={{ opacity: 0, y: 15 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: docIdx * 0.08 }}
-                            className="p-5 rounded-xl bg-blue-50/80 border border-blue-100 shadow group hover:bg-blue-100 transition-all"
-                          >
-                            <div className="font-semibold text-blue-900 mb-1 flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-blue-400" />
-                              {doc.name}
+                        {requirements[selectedCategory].type === "costs" ? (
+                          <>
+                            {/* Costs Section */}
+                            <div className="space-y-3">
+                              {commonCosts.map((cost, idx) => (
+                                <motion.div
+                                  key={idx}
+                                  initial={{ opacity: 0, y: 15 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: idx * 0.08 }}
+                                  className="p-4 rounded-xl bg-amber-50/80 border border-amber-100 shadow hover:bg-amber-100 transition-all"
+                                >
+                                  <div className="font-semibold text-amber-900 mb-1 flex items-center gap-2">
+                                    <CreditCard className="w-4 h-4 text-amber-600" />
+                                    {cost.category}
+                                  </div>
+                                  <div className="text-sm text-slate-600">{cost.description}</div>
+                                </motion.div>
+                              ))}
                             </div>
-                            <div className="text-sm text-slate-600">{doc.details}</div>
-                          </motion.div>
-                        ))}
+
+                            {/* Country Specific Requirements */}
+                            <div className="mt-6 pt-6 border-t border-slate-200">
+                              <h5 className="font-semibold text-lg text-blue-900 mb-3">
+                                {country.name} Specific Requirements
+                              </h5>
+                              <motion.div
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="p-4 rounded-xl bg-blue-50/80 border border-blue-100 shadow"
+                              >
+                                <div className="font-semibold text-blue-900 mb-1 flex items-center gap-2">
+                                  <Globe className="w-4 h-4 text-blue-600" />
+                                  Financial Proof Required
+                                </div>
+                                <div className="text-sm text-slate-600">
+                                  {requirements[selectedCategory].countrySpecific.financialRequirement}
+                                </div>
+                              </motion.div>
+                              <motion.div
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="p-4 rounded-xl bg-blue-50/80 border border-blue-100 shadow mt-3"
+                              >
+                                <div className="font-semibold text-blue-900 mb-1 flex items-center gap-2">
+                                  <Heart className="w-4 h-4 text-blue-600" />
+                                  Health Insurance Estimate
+                                </div>
+                                <div className="text-sm text-slate-600">
+                                  {requirements[selectedCategory].countrySpecific.insuranceEstimate}
+                                </div>
+                              </motion.div>
+                            </div>
+
+                            {/* Disclaimer */}
+                            <div className="mt-6 p-3 rounded-xl bg-red-50/80 border border-red-100 flex gap-2">
+                              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                              <div className="text-xs text-red-700">
+                                <p className="font-semibold mb-1">Disclaimer:</p>
+                                <p>Fees & document rules can change; final decision lies with the visa authority.</p>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          /* Documents Section */
+                          <>
+                            {requirements[selectedCategory].documents.map((doc: any, docIdx: number) => (
+                              <motion.div
+                                key={doc._id || docIdx}
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: docIdx * 0.08 }}
+                                className="p-5 rounded-xl bg-blue-50/80 border border-blue-100 shadow group hover:bg-blue-100 transition-all"
+                              >
+                                <div className="font-semibold text-blue-900 mb-1 flex items-center gap-2">
+                                  <FileText className="w-4 h-4 text-blue-400" />
+                                  {doc.name}
+                                </div>
+                                <div className="text-sm text-slate-600">{doc.details}</div>
+                              </motion.div>
+                            ))}
+                          </>
+                        )}
                       </CardContent>
                     </div>
                   </motion.div>

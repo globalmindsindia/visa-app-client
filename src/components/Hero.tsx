@@ -9,7 +9,7 @@ const Hero = () => {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--hero-gradient-start))] to-[hsl(var(--hero-gradient-end))] py-12 sm:py-16 md:py-20 lg:py-28">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container-app">
         <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
           <motion.div 
             initial={{ opacity: 0, x: -50 }}

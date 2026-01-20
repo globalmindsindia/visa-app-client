@@ -10,7 +10,7 @@ import {
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { visaRequirementsService } from "@/services/visaRequirementsService";
+import { getAllCountries } from "@/data/documentsData";
 
 // Utility to get SVG flag URL by ISO 2-letter country code
 const getFlagUrl = (code: string) =>
@@ -18,14 +18,10 @@ const getFlagUrl = (code: string) =>
 
 interface CountryInfo {
   name: string;
-  slug: string;
   flagCode: string;
   visaType: string;
-  shortRequirements: string[];
-  financialProof: string;
-  processingTime: string;
-  embassyLink: string;
   backgroundImage: string;
+  embassyLink: string;
 }
 
 // Motion variants for subtle zoom effect on cards
@@ -49,14 +45,10 @@ const Countries = () => {
     null
   );
 
-  // Fetch countries dynamically from backend
+  // Fetch countries from local data
   useEffect(() => {
-    visaRequirementsService
-      .getAll()
-      .then((res) => {
-        setCountries(res.data || []);
-      })
-      .catch((err) => console.error(err));
+    const allCountries = getAllCountries();
+    setCountries(allCountries);
   }, []);
 
   const handleCountryClick = (country: CountryInfo) => {
@@ -253,45 +245,24 @@ const Countries = () => {
               <div className="space-y-6">
                 <div>
                   <h4 className="font-heading font-semibold text-lg mb-3 text-primary">
-                    Requirements:
+                    About {selectedCountry.name}
                   </h4>
-                  <ul className="space-y-2">
-                    {selectedCountry.shortRequirements.map((req, idx) => (
-                      <li
-                        key={idx}
-                        className="font-body flex items-start gap-2"
-                      >
-                        <span className="text-primary mt-1">•</span>
-                        <span>{req}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="bg-muted p-4 rounded-lg">
-                    <h4 className="font-heading font-semibold mb-2 text-primary">
-                      Financial Proof
-                    </h4>
-                    <p className="font-body text-sm">
-                      {selectedCountry.financialProof}
-                    </p>
-                  </div>
-                  <div className="bg-muted p-4 rounded-lg">
-                    <h4 className="font-heading font-semibold mb-2 text-primary">
-                      Processing Time
-                    </h4>
-                    <p className="font-body text-sm">
-                      {selectedCountry.processingTime}
-                    </p>
-                  </div>
+                  <p className="font-body text-sm text-muted-foreground">
+                    Visa Type: <span className="font-semibold text-foreground">{selectedCountry.visaType}</span>
+                  </p>
                 </div>
                 <Button
                   className="w-full bg-primary hover:bg-primary/90"
-                  onClick={() =>
-                    window.open(selectedCountry.embassyLink, "_blank")
-                  }
+                  onClick={() => {
+                    setSelectedCountry(null);
+                    const slug = selectedCountry.name
+                      .replace(/\s+/g, "")
+                      .replace(/[^\w]/gi, "")
+                      .toLowerCase();
+                    navigate(`/requirements/${slug}`);
+                  }}
                 >
-                  Visit Embassy Website
+                  View Full Requirements
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </Button>
               </div>

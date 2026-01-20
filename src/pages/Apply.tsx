@@ -95,9 +95,9 @@ const Apply = () => {
   const [loading, setLoading] = useState(false);
 
   const FEES = {
-    application: 5000,
-    verification: 2000,
-    counselor: 3000,
+    application: 4500,
+    verification: 2700,
+    counselor: 2799,
   };
 
   const SUBTOTAL = FEES.application + FEES.verification + FEES.counselor;
@@ -1144,74 +1144,95 @@ const Apply = () => {
                           transition={{ duration: 0.3 }}
                           className="space-y-6"
                         >
-                          {/* PAYMENT SUMMARY */}
-                          <div className="bg-muted p-6 rounded-lg">
-                            <h3 className="font-heading font-semibold text-lg mb-4">
-                              Payment Summary
-                            </h3>
-
-                            <div className="space-y-2 font-body">
-                              <div className="flex justify-between">
-                                <span>Application Processing Fee</span>
-                                <span>
-                                  ₹{FEES.application.toLocaleString()}
-                                </span>
-                              </div>
-
-                              <div className="flex justify-between">
-                                <span>Document Verification</span>
-                                <span>
-                                  ₹{FEES.verification.toLocaleString()}
-                                </span>
-                              </div>
-
-                              <div className="flex justify-between">
-                                <span>Counselor Support</span>
-                                <span>₹{FEES.counselor.toLocaleString()}</span>
-                              </div>
-
-                              <div className="border-t pt-2 mt-2">
-                                <div className="flex justify-between">
-                                  <span>Subtotal</span>
-                                  <span>₹{SUBTOTAL.toLocaleString()}</span>
+                          {/* PAYMENT INFORMATION ALERT */}
+                          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div className="flex gap-3">
+                              <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 text-sm space-y-3">
+                                <div>
+                                  <p className="font-heading font-semibold text-yellow-900 mb-1">
+                                     Payment Information
+                                  </p>
+                                  <p className="text-yellow-800 font-medium">
+                                    ₹9,999 is a SERVICE CHARGE & PROCESSING DEPOSIT
+                                  </p>
+                                </div>
+                                
+                                <div>
+                                  <p className="font-heading font-semibold text-yellow-900 mb-2">This amount covers:</p>
+                                  <ul className="space-y-1 ml-2">
+                                    <li className="text-yellow-800 flex items-center gap-2">
+                                      <Check className="h-4 w-4 text-green-600" /> Application processing fee
+                                    </li>
+                                    <li className="text-yellow-800 flex items-center gap-2">
+                                      <Check className="h-4 w-4 text-green-600" /> Document verification fee
+                                    </li>
+                                    <li className="text-yellow-800 flex items-center gap-2">
+                                      <Check className="h-4 w-4 text-green-600" /> Counselor guidance & support fee
+                                    </li>
+                                  </ul>
                                 </div>
 
-                                {appliedCoupon && (
-                                  <motion.div
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="flex justify-between text-green-600 mt-1"
-                                  >
-                                    <span className="flex items-center gap-1">
-                                      <Percent className="h-4 w-4" />
-                                      Discount ({appliedCoupon})
-                                    </span>
-                                    <span>-₹{discount.toLocaleString()}</span>
-                                  </motion.div>
-                                )}
-
-                                <div className="flex justify-between font-semibold text-lg mt-2 pt-2 border-t">
-                                  <span>Total Amount</span>
-                                  <span
-                                    className={
-                                      appliedCoupon
-                                        ? "text-green-600"
-                                        : "text-primary"
-                                    }
-                                  >
-                                    ₹{getFinalAmount().toLocaleString()}
-                                  </span>
+                                <div>
+                                  <p className="font-heading font-semibold text-yellow-900 mb-2">Additional charges that will be applied after this payment:</p>
+                                  <ul className="space-y-1 ml-2">
+                                    <li className="text-yellow-800">• Embassy/Government visa fee (country-specific)</li>
+                                    <li className="text-yellow-800">• VFS service center fee (if applicable)</li>
+                                    <li className="text-yellow-800">• Health insurance requirements</li>
+                                    <li className="text-yellow-800">• Document translation & notarization</li>
+                                    <li className="text-yellow-800">• Courier & shipping charges</li>
+                                    <li className="text-yellow-800">• Other country-specific requirements</li>
+                                  </ul>
                                 </div>
 
-                                {appliedCoupon && (
-                                  <motion.div
-                                    initial={{ scale: 0.8, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    className="text-sm text-green-600 text-right mt-1"
-                                  >
-                                    You saved ₹{discount.toLocaleString()}!
-                                  </motion.div>
-                                )}
+                                {/* PAYMENT SUMMARY TOTALS */}
+                                <div className="bg-white bg-opacity-70 rounded-lg p-3 mt-3 border border-yellow-100">
+                                  <div className="space-y-2">
+                                    <div className="flex justify-between text-yellow-900 font-medium">
+                                      <span>Subtotal</span>
+                                      <span>₹{SUBTOTAL.toLocaleString()}</span>
+                                    </div>
+                                    
+                                    {appliedCoupon && (
+                                      <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="flex justify-between text-green-600 text-sm"
+                                      >
+                                        <span className="flex items-center gap-1">
+                                          <Percent className="h-4 w-4" />
+                                          Discount ({appliedCoupon})
+                                        </span>
+                                        <span>-₹{discount.toLocaleString()}</span>
+                                      </motion.div>
+                                    )}
+                                    
+                                    <div className="border-t border-yellow-200 pt-2">
+                                      <div className="flex justify-between font-semibold text-base text-yellow-900">
+                                        <span>Total Amount to Pay</span>
+                                        <span className={appliedCoupon ? "text-green-600" : "text-yellow-900"}>
+                                          ₹{getFinalAmount().toLocaleString()}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    {appliedCoupon && (
+                                      <motion.div
+                                        initial={{ scale: 0.8, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        className="text-xs text-green-600 font-medium mt-1"
+                                      >
+                                        ✓ You saved ₹{discount.toLocaleString()}!
+                                      </motion.div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="bg-white bg-opacity-60 rounded p-2 mt-2">
+                                  <p className="text-yellow-900 italic text-xs">
+                                    Our team will provide a detailed breakdown of all charges when your visa process officially starts.
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1333,7 +1354,7 @@ const Apply = () => {
                         {isProcessing
                           ? "Processing..."
                           : step === totalSteps
-                          ? `Submit & Pay ₹${10000 - discount}`
+                          ? `Submit & Pay ₹${getFinalAmount().toLocaleString()}`
                           : "Next"}
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
